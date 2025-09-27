@@ -1,0 +1,269 @@
+import React, { useState, useEffect } from 'react';
+import { Plus, Search, User, Edit, Trash2, UserX, UserCheck } from 'lucide-react';
+import DentistCard from '../components/Dentists/DentistCard';
+import DentistModal from '../components/Dentists/DentistModal';
+import { Dentist } from '../types';
+import { useAuth } from '../hooks/useAuth';
+import { buscarDentistas, criarDentista, atualizarDentista, deletarDentista } from '../services/dentistService';
+
+
+const DentistsPage: React.FC = () => {
+  const [dentists, setDentists] = useState<Dentist[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDentist, setSelectedDentist] = useState<Dentist | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive'>('all');
+  const [isLoading, setIsLoading] = useState(true);
+  const { user, permissions } = useAuth();
+
+  // Verificar se usuário tem permissão para acessar esta página
+  if (!permissions.canViewAllDentists) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-8">
+          <div className="bg-red-50 border border-red-200 p-8 rounded-lg shadow-md">
+            <User size={64} className="mx-auto text-red-400 mb-4" />
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Acesso Restrito</h1>
+            <p className="text-lg text-gray-600 mb-6">
+              Você não tem permissão para visualizar a lista de dentistas.
+            </p>
+            <p className="text-gray-500">
+              Esta funcionalidade está disponível apenas para administradores da clínica.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Carregar dentistas do Supabase
+  useEffect(() => {
+    const loadDentists = async () => {
+      if (!user?.clinicId || user.clinicId === 'test-clinic-id') {
+        setIsLoading(false);
+        return;
+      }
+      
+      try {
+        setIsLoading(true);
+        const data = await buscarDentistas(user.clinicId);
+        
+        setDentists(data.map(d => ({
+          id: d.dentista_id,
+          name: d.nome,
+          email: d.usuario?.email || '',
+          phoneNumber: '',
+          specialization: d.especialidades?.nome_especialidade || 'Não informado',
+          cro: d.cro,
+          isActive: d.usuario?.ativo ?? true,
+          createdAt: d.criado_em,
+          workingHours: { start: '08:00', end: '17:00' },
+          workingDays: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
+          linkedUserId: d.usuario?.usuario_id,
+        })));
+      } catch (error) {
+        console.error('Erro ao carregar dentistas:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadDentists();
+  }, [user?.clinicId]);
+  const handleEditDentist = (dentist: Dentist) => {
+    setSelectedDentist(dentist);
+    setIsModalOpen(true);
+  };
+
+  const handleAddDentist = () => {
+    setSelectedDentist(null);
+    setIsModalOpen(true);
+  };
+
+  const handleSaveDentist = async (dentistData: Omit<Dentist, 'id' | 'createdAt'>) => {
+    if (!user?.clinicId || user.clinicId === 'test-clinic-id') return;
+    
+    try {
+      if (selectedDentist) {
+        // Editar dentista existente
+        await atualizarDentista(selectedDentist.id, {
+          nome: dentistData.name,
+          especialidade: 1, // TODO: mapear especialização para ID
+          cro: dentistData.cro,
+          clinica_id: user.clinicId,
+        });
+      } else {
+        // Adicionar novo dentista
+        await criarDentista({
+          nome: dentistData.name,
+          especialidade: 1, // TODO: mapear especialização para ID
+          cro: dentistData.cro,
+          clinica_id: user.clinicId,
+        });
+      }
+      
+      // Recarregar lista
+      const data = await buscarDentistas(user.clinicId);
+      setDentists(data.map(d => ({
+        id: d.dentista_id,
+        name: d.nome,
+        email: d.usuario?.email || '',
+        phoneNumber: '',
+        specialization: d.especialidades?.nome_especialidade || 'Não informado',
+        cro: d.cro,
+        isActive: d.usuario?.ativo ?? true,
+        createdAt: d.criado_em,
+        workingHours: { start: '08:00', end: '17:00' },
+        workingDays: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
+        linkedUserId: d.usuario?.usuario_id,
+      })));
+      
+    } catch (error) {
+      console.error('Erro ao salvar dentista:', error);
+      alert('Erro ao salvar dentista. Tente novamente.');
+    }
+    
+    setIsModalOpen(false);
+    setSelectedDentist(null);
+  };
+
+  const handleToggleActive = (dentistId: string) => {
+    // TODO: Implementar toggle de status no Supabase
+    console.log('Toggle status dentista:', dentistId);
+  };
+
+  const handleDeleteDentist = async (dentistId: string) => {
+    if (!window.confirm('Tem certeza que deseja excluir este dentista? Esta ação não pode ser desfeita.')) {
+      return;
+    }
+    
+    try {
+      await deletarDentista(dentistId);
+      setDentists(dentists.filter(d => d.id !== dentistId));
+    } catch (error) {
+      console.error('Erro ao deletar dentista:', error);
+      alert('Erro ao deletar dentista. Tente novamente.');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+  const filteredDentists = dentists.filter((dentist) => {
+    const matchesSearch = 
+      dentist.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      dentist.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      dentist.specialization.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      dentist.cro.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesFilter = 
+      filterActive === 'all' ||
+      (filterActive === 'active' && dentist.isActive) ||
+      (filterActive === 'inactive' && !dentist.isActive);
+
+    return matchesSearch && matchesFilter;
+  });
+
+  return (
+    <div>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Gestão de Dentistas</h1>
+          <p className="text-gray-600">Gerencie os profissionais da sua clínica</p>
+        </div>
+        <button
+          onClick={handleAddDentist}
+          className="mt-4 md:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+        >
+          <Plus size={20} className="mr-2" />
+          Adicionar Dentista
+        </button>
+      </div>
+
+      <div className="mb-6 space-y-4">
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search size={20} className="text-gray-400" />
+          </div>
+          <input
+            type="text"
+            placeholder="Buscar dentistas por nome, email, especialização ou CRO..."
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        <div className="flex space-x-2">
+          <button
+            onClick={() => setFilterActive('all')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+              filterActive === 'all'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Todos ({dentists.length})
+          </button>
+          <button
+            onClick={() => setFilterActive('active')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+              filterActive === 'active'
+                ? 'bg-green-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Ativos ({dentists.filter(d => d.isActive).length})
+          </button>
+          <button
+            onClick={() => setFilterActive('inactive')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+              filterActive === 'inactive'
+                ? 'bg-red-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Inativos ({dentists.filter(d => !d.isActive).length})
+          </button>
+        </div>
+      </div>
+
+      {filteredDentists.length === 0 ? (
+        <div className="bg-white rounded-lg shadow-md p-6 text-center">
+          <User size={48} className="mx-auto text-gray-400 mb-2" />
+          <p className="text-gray-500">Nenhum dentista encontrado com os filtros aplicados.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredDentists.map((dentist) => (
+            <DentistCard
+              key={dentist.id}
+              dentist={dentist}
+              onEdit={handleEditDentist}
+              onToggleActive={handleToggleActive}
+              onDelete={handleDeleteDentist}
+            />
+          ))}
+        </div>
+      )}
+
+      {isModalOpen && (
+        <DentistModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedDentist(null);
+          }}
+          dentist={selectedDentist}
+          onSave={handleSaveDentist}
+        />
+      )}
+    </div>
+  );
+};
+
+export default DentistsPage;
