@@ -6,6 +6,13 @@ export interface DentistaCompleto {
   nome: string;
   especialidade: number;
   cro: string;
+  email?: string;
+  telefone?: string;
+  ativo?: boolean;
+  horario_inicio?: string;
+  horario_fim?: string;
+  dias_trabalho?: string[];
+  usuario_id?: string;
   disponibilidade?: any;
   criado_em: string;
   especialidades?: {
@@ -25,6 +32,13 @@ export interface CreateDentistaData {
   especialidade: number;
   cro: string;
   clinica_id: string;
+  email?: string;
+  telefone?: string;
+  ativo?: boolean;
+  horario_inicio?: string;
+  horario_fim?: string;
+  dias_trabalho?: string[];
+  usuario_id?: string;
   disponibilidade?: any;
 }
 
