@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, UserCheck, UserX, Crown } from 'lucide-react';
+import { Plus, CreditCard as Edit, Trash2, UserCheck, UserX, Crown } from 'lucide-react';
 import { CalendarIntegration } from '../types';
 import CalendarConnector from '../components/Integration/CalendarConnector';
 import UserManagementModal from '../components/Settings/UserManagementModal';
