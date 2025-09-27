@@ -149,14 +149,20 @@ export const deletarDentista = async (dentistaId: string): Promise<void> => {
  * Busca especialidades disponíveis
  */
 export const buscarEspecialidades = async (): Promise<Array<{id_especialidade: number, nome_especialidade: string}>> => {
+  console.log('🔍 DEBUG - Buscando especialidades...');
+  
   const { data, error } = await supabase
     .from('especialidades')
     .select('id_especialidade, nome_especialidade')
     .order('nome_especialidade');
 
+  console.log('🔍 DEBUG - Resultado especialidades:', { data, error });
+
   if (error) {
+    console.error('❌ DEBUG - Erro ao buscar especialidades:', error);
     throw new Error(`Erro ao buscar especialidades: ${error.message}`);
   }
 
+  console.log('✅ DEBUG - Especialidades encontradas:', data?.length || 0);
   return data || [];
 };

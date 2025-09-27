@@ -46,15 +46,26 @@ const DentistModal: React.FC<DentistModalProps> = ({
   // Carregar especialidades
   useEffect(() => {
     const loadEspecialidades = async () => {
+      console.log('🦷 DEBUG - Modal: Carregando especialidades...');
       try {
         const data = await buscarEspecialidades();
+        console.log('🦷 DEBUG - Modal: Especialidades carregadas:', data);
         setEspecialidades(data);
       } catch (error) {
         console.error('Erro ao carregar especialidades:', error);
+        // Fallback com especialidades básicas se houver erro
+        setEspecialidades([
+          { id_especialidade: 1, nome_especialidade: 'Clínica Geral' },
+          { id_especialidade: 2, nome_especialidade: 'Ortodontia' },
+          { id_especialidade: 3, nome_especialidade: 'Endodontia' },
+          { id_especialidade: 4, nome_especialidade: 'Periodontia' },
+          { id_especialidade: 5, nome_especialidade: 'Implantodontia' },
+        ]);
       }
     };
 
     if (isOpen) {
+      console.log('🦷 DEBUG - Modal aberto, carregando especialidades...');
       loadEspecialidades();
     }
   }, [isOpen]);
