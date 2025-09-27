@@ -44,14 +44,17 @@ const DentistsPage: React.FC = () => {
         setDentists(data.map(d => ({
           id: d.dentista_id,
           name: d.nome,
-          email: d.usuario?.email || '',
-          phoneNumber: '',
+          email: d.email || d.usuario?.email || '',
+          phoneNumber: d.telefone || '',
           specialization: d.especialidades?.nome_especialidade || 'Não informado',
           cro: d.cro,
-          isActive: d.usuario?.ativo ?? true,
+          isActive: d.ativo ?? d.usuario?.ativo ?? true,
           createdAt: d.criado_em,
-          workingHours: { start: '08:00', end: '17:00' },
-          workingDays: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
+          workingHours: { 
+            start: d.horario_inicio || '08:00', 
+            end: d.horario_fim || '17:00' 
+          },
+          workingDays: d.dias_trabalho || ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
           linkedUserId: d.usuario?.usuario_id,
         })));
         
@@ -131,8 +134,14 @@ const DentistsPage: React.FC = () => {
         // Editar dentista existente
         await atualizarDentista(selectedDentist.id, {
           nome: dentistData.name,
+          email: dentistData.email,
+          telefone: dentistData.phoneNumber,
           especialidade: especialidadeId,
           cro: dentistData.cro,
+          ativo: dentistData.isActive,
+          horario_inicio: dentistData.workingHours.start,
+          horario_fim: dentistData.workingHours.end,
+          dias_trabalho: dentistData.workingDays,
           clinica_id: user.clinicId,
         });
       } else {
@@ -140,8 +149,14 @@ const DentistsPage: React.FC = () => {
         // Adicionar novo dentista
         await criarDentista({
           nome: dentistData.name,
+          email: dentistData.email,
+          telefone: dentistData.phoneNumber,
           especialidade: especialidadeId,
           cro: dentistData.cro,
+          ativo: dentistData.isActive,
+          horario_inicio: dentistData.workingHours.start,
+          horario_fim: dentistData.workingHours.end,
+          dias_trabalho: dentistData.workingDays,
           clinica_id: user.clinicId,
         });
       }
@@ -154,14 +169,17 @@ const DentistsPage: React.FC = () => {
       setDentists(data.map(d => ({
         id: d.dentista_id,
         name: d.nome,
-        email: d.usuario?.email || '',
-        phoneNumber: '',
+        email: d.email || d.usuario?.email || '',
+        phoneNumber: d.telefone || '',
         specialization: d.especialidades?.nome_especialidade || 'Não informado',
         cro: d.cro,
-        isActive: d.usuario?.ativo ?? true,
+        isActive: d.ativo ?? d.usuario?.ativo ?? true,
         createdAt: d.criado_em,
-        workingHours: { start: '08:00', end: '17:00' },
-        workingDays: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
+        workingHours: { 
+          start: d.horario_inicio || '08:00', 
+          end: d.horario_fim || '17:00' 
+        },
+        workingDays: d.dias_trabalho || ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
         linkedUserId: d.usuario?.usuario_id,
       })));
       
