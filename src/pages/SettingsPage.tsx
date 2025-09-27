@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, CreditCard as Edit, Trash2, UserCheck, UserX, Crown } from 'lucide-react';
 import { CalendarIntegration } from '../types';
 import CalendarConnector from '../components/Integration/CalendarConnector';
+import MegaApiConnector from '../components/Integration/MegaApiConnector';
 import UserManagementModal from '../components/Settings/UserManagementModal';
 import { useAuth } from '../hooks/useAuth';
 import { buscarUsuarios, criarUsuario, atualizarUsuario, deletarUsuario, alternarStatusUsuario } from '../services/userService';
@@ -463,11 +464,14 @@ const SettingsPage: React.FC = () => {
           )}
 
           {activeTab === 'integrations' && (
-            <CalendarConnector
-              integrations={integrations}
-              onConnect={handleConnect}
-              onDisconnect={handleDisconnect}
-            />
+            <div className="space-y-6">
+              <MegaApiConnector />
+              <CalendarConnector
+                integrations={integrations}
+                onConnect={handleConnect}
+                onDisconnect={handleDisconnect}
+              />
+            </div>
           )}
 
           {activeTab === 'notifications' && (
