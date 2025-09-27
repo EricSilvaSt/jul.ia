@@ -16,6 +16,11 @@ const DentistsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { user, permissions } = useAuth();
 
+  console.log('🦷 DEBUG - DentistsPage iniciado');
+  console.log('  - user:', user);
+  console.log('  - user.clinicId:', user?.clinicId);
+  console.log('  - permissions:', permissions);
+
   // Verificar se usuário tem permissão para acessar esta página
   if (!permissions.canViewAllDentists) {
     return (
@@ -39,14 +44,20 @@ const DentistsPage: React.FC = () => {
   // Carregar dentistas do Supabase
   useEffect(() => {
     const loadDentists = async () => {
-      if (!user?.clinicId || user.clinicId === 'test-clinic-id') {
+      console.log('🦷 DEBUG - loadDentists iniciado');
+      console.log('  - user.clinicId:', user?.clinicId);
+      
+      if (!user?.clinicId) {
+        console.log('❌ DEBUG - Sem clinicId, parando execução');
         setIsLoading(false);
         return;
       }
       
       try {
         setIsLoading(true);
+        console.log('🦷 DEBUG - Chamando buscarDentistas...');
         const data = await buscarDentistas(user.clinicId);
+        console.log('🦷 DEBUG - Dados retornados:', data);
         
         setDentists(data.map(d => ({
           id: d.dentista_id,
@@ -62,7 +73,8 @@ const DentistsPage: React.FC = () => {
           linkedUserId: d.usuario?.usuario_id,
         })));
       } catch (error) {
-        console.error('Erro ao carregar dentistas:', error);
+        console.error('❌ DEBUG - Erro ao carregar dentistas:', error);
+        setDentists([]);
       } finally {
         setIsLoading(false);
       }
@@ -81,7 +93,10 @@ const DentistsPage: React.FC = () => {
   };
 
   const handleSaveDentist = async (dentistData: Omit<Dentist, 'id' | 'createdAt'>) => {
-    if (!user?.clinicId || user.clinicId === 'test-clinic-id') return;
+    if (!user?.clinicId) {
+      alert('Erro: ID da clínica não encontrado');
+      return;
+    }
     
     try {
       if (selectedDentist) {

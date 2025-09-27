@@ -32,32 +32,47 @@ const SettingsPage: React.FC = () => {
 
   // Carregar dados da clínica
   const loadClinicData = async () => {
-    if (!user?.clinicId || user.clinicId === 'test-clinic-id') {
+    console.log('⚙️ DEBUG - loadClinicData iniciado');
+    console.log('  - user.clinicId:', user?.clinicId);
+    
+    if (!user?.clinicId) {
+      console.log('❌ DEBUG - Sem clinicId, parando execução');
       setClinicData(null);
       return;
     }
     
     try {
+      console.log('⚙️ DEBUG - Chamando buscarClinicaCompleta...');
       const data = await buscarClinicaCompleta(user.clinicId);
+      console.log('⚙️ DEBUG - Dados da clínica retornados:', data);
       setClinicData(data);
     } catch (error) {
-      console.error('Erro ao carregar dados da clínica:', error);
+      console.error('❌ DEBUG - Erro ao carregar dados da clínica:', error);
+      // Em caso de erro, usar dados básicos da clínica do contexto
+      setClinicData(clinic);
     }
   };
 
   // Carregar usuários da clínica
   const loadUsers = async () => {
-    if (!user?.clinicId || user.clinicId === 'test-clinic-id') {
+    console.log('👥 DEBUG - loadUsers iniciado');
+    console.log('  - user.clinicId:', user?.clinicId);
+    
+    if (!user?.clinicId) {
+      console.log('❌ DEBUG - Sem clinicId, parando execução');
       setUsers([]);
       return;
     }
     
     try {
       setIsLoading(true);
+      console.log('👥 DEBUG - Chamando buscarUsuarios...');
       const userData = await buscarUsuarios(user.clinicId);
+      console.log('👥 DEBUG - Dados de usuários retornados:', userData);
       setUsers(userData);
     } catch (error) {
-      console.error('Erro ao carregar usuários:', error);
+      console.error('❌ DEBUG - Erro ao carregar usuários:', error);
+      setUsers([]);
     } finally {
       setIsLoading(false);
     }
@@ -120,8 +135,8 @@ const SettingsPage: React.FC = () => {
   };
 
   const handleSaveUser = async (userData: any) => {
-    if (!user?.clinicId || user.clinicId === 'test-clinic-id') {
-      alert('Funcionalidade não disponível no modo de teste');
+    if (!user?.clinicId) {
+      alert('Erro: ID da clínica não encontrado');
       return;
     }
     
@@ -206,35 +221,6 @@ const SettingsPage: React.FC = () => {
             <div className="space-y-6">
               <h2 className="text-lg font-medium text-gray-900">Informações da Clínica</h2>
               
-              {/* Informações do Plano */}
-              {displayClinic.plano && (
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 mb-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <Crown size={24} className="text-yellow-500 mr-3" />
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900">Plano {displayClinic.plano.nome}</h3>
-                        <p className="text-sm text-gray-600">{displayClinic.plano.descricao || 'Plano ativo da clínica'}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-blue-600">
-                        R$ {displayClinic.plano.preco_mensal?.toFixed(2) || '0,00'}
-                      </p>
-                      <p className="text-sm text-gray-500">por mês</p>
-                    </div>
-                  </div>
-                  {displayClinic.plano.max_dentistas && (
-                    <div className="mt-3 text-sm text-gray-600">
-                      <p>• Máximo de {displayClinic.plano.max_dentistas} dentistas</p>
-                      {displayClinic.plano.max_agendamentos_mes && (
-                        <p>• Até {displayClinic.plano.max_agendamentos_mes} agendamentos por mês</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-
               <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
                 <div className="flex">
                   <div className="ml-3">
@@ -266,7 +252,7 @@ const SettingsPage: React.FC = () => {
                   <input
                     type="text"
                     name="razao_social"
-                    value={displayClinic.razao_social || 'Não informado'}
+                    value={displayClinic?.razao_social || 'Não informado'}
                     readOnly
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 bg-gray-50"
                   />
@@ -290,7 +276,7 @@ const SettingsPage: React.FC = () => {
                   <input
                     type="text"
                     name="cnpj"
-                    value={displayClinic.cnpj || 'Não informado'}
+                    value={displayClinic?.cnpj || 'Não informado'}
                     readOnly
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 bg-gray-50"
                   />
@@ -331,7 +317,7 @@ const SettingsPage: React.FC = () => {
                     <input
                       type="text"
                       name="endereco"
-                      value={displayClinic.endereco || 'Não informado'}
+                      value={displayClinic?.endereco || 'Não informado'}
                       readOnly
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 bg-gray-50"
                     />
@@ -343,7 +329,7 @@ const SettingsPage: React.FC = () => {
                     <input
                       type="text"
                       name="numero"
-                      value={displayClinic.numero || 'S/N'}
+                      value={displayClinic?.numero || 'S/N'}
                       readOnly
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 bg-gray-50"
                     />
@@ -355,7 +341,7 @@ const SettingsPage: React.FC = () => {
                     <input
                       type="text"
                       name="complemento"
-                      value={displayClinic.complemento || 'Não informado'}
+                      value={displayClinic?.complemento || 'Não informado'}
                       readOnly
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 bg-gray-50"
                     />
@@ -367,7 +353,7 @@ const SettingsPage: React.FC = () => {
                     <input
                       type="text"
                       name="bairro"
-                      value={displayClinic.bairro || 'Não informado'}
+                      value={displayClinic?.bairro || 'Não informado'}
                       readOnly
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 bg-gray-50"
                     />
@@ -379,7 +365,7 @@ const SettingsPage: React.FC = () => {
                     <input
                       type="text"
                       name="cidade"
-                      value={displayClinic.cidade || 'Não informado'}
+                      value={displayClinic?.cidade || 'Não informado'}
                       readOnly
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 bg-gray-50"
                     />
@@ -391,7 +377,7 @@ const SettingsPage: React.FC = () => {
                     <input
                       type="text"
                       name="estado"
-                      value={displayClinic.estado || 'Não informado'}
+                      value={displayClinic?.estado || 'Não informado'}
                       readOnly
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 bg-gray-50"
                     />
@@ -403,7 +389,7 @@ const SettingsPage: React.FC = () => {
                     <input
                       type="text"
                       name="cep"
-                      value={displayClinic.cep || 'Não informado'}
+                      value={displayClinic?.cep || 'Não informado'}
                       readOnly
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 bg-gray-50"
                     />
@@ -411,13 +397,13 @@ const SettingsPage: React.FC = () => {
                 </div>
               </div>
 
-              {displayClinic.convenios && (
+              {displayClinic?.convenios && (
                 <div>
                   <h3 className="text-lg font-medium text-gray-900 mb-4">Convênios Aceitos</h3>
                   <div className="bg-gray-50 p-4 rounded-md">
                     <div className="flex flex-wrap gap-2">
-                      {Array.isArray(displayClinic.convenios) ? (
-                        displayClinic.convenios.map((convenio: string, index: number) => (
+                      {Array.isArray(displayClinic?.convenios) ? (
+                        displayClinic?.convenios.map((convenio: string, index: number) => (
                           <span key={index} className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
                             {convenio}
                           </span>

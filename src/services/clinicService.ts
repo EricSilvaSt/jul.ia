@@ -16,22 +16,15 @@ export interface ClinicaCompleta {
   estado?: string;
   cep?: string;
   convenios?: any;
-  plano: {
-    id: number;
-    nome: string;
-    descricao?: string;
-    preco_mensal: number;
-    preco_anual?: number;
-    max_dentistas?: number;
-    max_agendamentos_mes?: number;
-    recursos: any;
-  };
 }
 
 /**
- * Busca informações completas da clínica com plano
+ * Busca informações completas da clínica
  */
 export const buscarClinicaCompleta = async (clinicaId: string): Promise<ClinicaCompleta> => {
+  console.log('🏥 DEBUG - buscarClinicaCompleta iniciado');
+  console.log('  - clinicaId:', clinicaId);
+  
   const { data, error } = await supabase
     .from('clinica')
     .select(`
@@ -49,29 +42,20 @@ export const buscarClinicaCompleta = async (clinicaId: string): Promise<ClinicaC
       cidade,
       estado,
       cep,
-      convenios,
-      planos (
-        id,
-        nome,
-        descricao,
-        preco_mensal,
-        preco_anual,
-        max_dentistas,
-        max_agendamentos_mes,
-        recursos
-      )
+      convenios
     `)
     .eq('clinica_id', clinicaId)
-    .single();
+    .maybeSingle();
 
+  console.log('🏥 DEBUG - Resultado da query:', { data, error });
+  
   if (error || !data) {
-    throw new Error('Erro ao buscar informações da clínica');
+    console.error('❌ DEBUG - Erro ao buscar clínica:', error);
+    throw new Error(`Erro ao buscar informações da clínica: ${error?.message || 'Clínica não encontrada'}`);
   }
 
-  return {
-    ...data,
-    plano: data.planos,
-  };
+  console.log('✅ DEBUG - Clínica encontrada:', data.nome_fantasia);
+  return data;
 };
 
 /**
