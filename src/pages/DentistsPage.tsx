@@ -21,26 +21,6 @@ const DentistsPage: React.FC = () => {
   console.log('  - user.clinicId:', user?.clinicId);
   console.log('  - permissions:', permissions);
 
-  // Verificar se usuário tem permissão para acessar esta página
-  if (!permissions.canViewAllDentists) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <div className="bg-red-50 border border-red-200 p-8 rounded-lg shadow-md">
-            <User size={64} className="mx-auto text-red-400 mb-4" />
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Acesso Restrito</h1>
-            <p className="text-lg text-gray-600 mb-6">
-              Você não tem permissão para visualizar a lista de dentistas.
-            </p>
-            <p className="text-gray-500">
-              Esta funcionalidade está disponível apenas para administradores da clínica.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // Carregar dentistas do Supabase
   useEffect(() => {
     const loadDentists = async () => {
@@ -82,6 +62,27 @@ const DentistsPage: React.FC = () => {
 
     loadDentists();
   }, [user?.clinicId]);
+
+  // Verificar se usuário tem permissão para acessar esta página
+  if (!permissions.canViewAllDentists) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-8">
+          <div className="bg-red-50 border border-red-200 p-8 rounded-lg shadow-md">
+            <User size={64} className="mx-auto text-red-400 mb-4" />
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Acesso Restrito</h1>
+            <p className="text-lg text-gray-600 mb-6">
+              Você não tem permissão para visualizar a lista de dentistas.
+            </p>
+            <p className="text-gray-500">
+              Esta funcionalidade está disponível apenas para administradores da clínica.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const handleEditDentist = (dentist: Dentist) => {
     setSelectedDentist(dentist);
     setIsModalOpen(true);
