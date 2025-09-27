@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, User, Edit, Trash2, UserX, UserCheck } from 'lucide-react';
+import { Plus, Search, User, CreditCard as Edit, Trash2, UserX, UserCheck } from 'lucide-react';
 import DentistCard from '../components/Dentists/DentistCard';
 import DentistModal from '../components/Dentists/DentistModal';
 import { Dentist } from '../types';
