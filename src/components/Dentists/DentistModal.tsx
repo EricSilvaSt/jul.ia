@@ -46,14 +46,33 @@ const DentistModal: React.FC<DentistModalProps> = ({
   // Carregar especialidades
   useEffect(() => {
     const loadEspecialidades = async () => {
-      console.log('🦷 DEBUG - Modal: Carregando especialidades...');
+      console.log('🦷 DEBUG - Modal: loadEspecialidades INICIADO');
+      console.log('🦷 DEBUG - Modal: isOpen =', isOpen);
+      
       try {
+        console.log('🦷 DEBUG - Modal: Chamando buscarEspecialidades...');
         const data = await buscarEspecialidades();
-        console.log('🦷 DEBUG - Modal: Especialidades carregadas:', data);
-        setEspecialidades(data);
+        console.log('🦷 DEBUG - Modal: Dados retornados:', data);
+        console.log('🦷 DEBUG - Modal: Quantidade:', data?.length);
+        
+        if (data && data.length > 0) {
+          console.log('🦷 DEBUG - Modal: Setando especialidades no estado');
+          setEspecialidades(data);
+        } else {
+          console.log('🦷 DEBUG - Modal: Dados vazios, usando fallback');
+          setEspecialidades([
+            { id_especialidade: 1, nome_especialidade: 'Clínica Geral' },
+            { id_especialidade: 2, nome_especialidade: 'Ortodontia' },
+            { id_especialidade: 3, nome_especialidade: 'Endodontia' },
+            { id_especialidade: 4, nome_especialidade: 'Periodontia' },
+            { id_especialidade: 5, nome_especialidade: 'Implantodontia' },
+          ]);
+        }
+        
       } catch (error) {
-        console.error('Erro ao carregar especialidades:', error);
-        // Fallback com especialidades básicas se houver erro
+        console.error('❌ DEBUG - Modal: Erro ao carregar especialidades:', error);
+        console.log('🦷 DEBUG - Modal: Usando fallback devido ao erro');
+        setEspecialidades(data);
         setEspecialidades([
           { id_especialidade: 1, nome_especialidade: 'Clínica Geral' },
           { id_especialidade: 2, nome_especialidade: 'Ortodontia' },
@@ -62,11 +81,15 @@ const DentistModal: React.FC<DentistModalProps> = ({
           { id_especialidade: 5, nome_especialidade: 'Implantodontia' },
         ]);
       }
+      
+      console.log('🦷 DEBUG - Modal: loadEspecialidades FINALIZADO');
     };
 
     if (isOpen) {
-      console.log('🦷 DEBUG - Modal aberto, carregando especialidades...');
+      console.log('🦷 DEBUG - Modal: Modal está aberto, iniciando carregamento...');
       loadEspecialidades();
+    } else {
+      console.log('🦷 DEBUG - Modal: Modal fechado, não carregando especialidades');
     }
   }, [isOpen]);
 
@@ -251,6 +274,9 @@ const DentistModal: React.FC<DentistModalProps> = ({
                     </option>
                   ))}
                 </select>
+                <div className="mt-1 text-xs text-gray-500">
+                  DEBUG: {especialidades.length} especialidades carregadas
+                </div>
               </div>
 
               <div className="flex items-center">

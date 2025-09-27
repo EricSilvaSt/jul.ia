@@ -149,9 +149,44 @@ export const deletarDentista = async (dentistaId: string): Promise<void> => {
  * Busca especialidades disponíveis
  */
 export const buscarEspecialidades = async (): Promise<Array<{id_especialidade: number, nome_especialidade: string}>> => {
-  console.log('🔍 DEBUG - Buscando especialidades...');
+  console.log('🔍 DEBUG - buscarEspecialidades INICIADO');
+  console.log('🔍 DEBUG - Supabase client:', supabase);
   
-  const { data, error } = await supabase
+  try {
+    console.log('🔍 DEBUG - Fazendo query na tabela especialidades...');
+    
+    const { data, error } = await supabase
+      .from('especialidades')
+      .select('id_especialidade, nome_especialidade')
+      .order('nome_especialidade');
+
+    console.log('🔍 DEBUG - Query executada');
+    console.log('🔍 DEBUG - Data:', data);
+    console.log('🔍 DEBUG - Error:', error);
+    console.log('🔍 DEBUG - Data length:', data?.length);
+    
+    if (error) {
+      console.error('❌ DEBUG - Erro na query:', error);
+      console.error('❌ DEBUG - Error code:', error.code);
+      console.error('❌ DEBUG - Error message:', error.message);
+      console.error('❌ DEBUG - Error details:', error.details);
+      throw new Error(`Erro ao buscar especialidades: ${error.message}`);
+    }
+
+    if (!data || data.length === 0) {
+      console.log('⚠️ DEBUG - Nenhuma especialidade encontrada na tabela');
+      return [];
+    }
+
+    console.log('✅ DEBUG - Especialidades encontradas:', data.length);
+    console.log('✅ DEBUG - Primeira especialidade:', data[0]);
+    return data;
+    
+  } catch (error) {
+    console.error('❌ DEBUG - Exception em buscarEspecialidades:', error);
+    throw error;
+  }
+};
     .from('especialidades')
     .select('id_especialidade, nome_especialidade')
     .order('nome_especialidade');
