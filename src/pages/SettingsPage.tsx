@@ -5,7 +5,7 @@ import CalendarConnector from '../components/Integration/CalendarConnector';
 import UserManagementModal from '../components/Settings/UserManagementModal';
 import { useAuth } from '../hooks/useAuth';
 import { buscarUsuarios, criarUsuario, atualizarUsuario, deletarUsuario, alternarStatusUsuario } from '../services/userService';
-import { buscarClinicaCompleta } from '../services/clinicService';
+import { getClinicInfo } from '../services/authService';
 
 // Dados simulados para integrações
 const mockIntegrations: CalendarIntegration[] = [
@@ -43,7 +43,7 @@ const SettingsPage: React.FC = () => {
     
     try {
       console.log('⚙️ DEBUG - Chamando buscarClinicaCompleta...');
-      const data = await buscarClinicaCompleta(user.clinicId);
+      const data = await getClinicInfo(user.clinicId);
       console.log('⚙️ DEBUG - Dados da clínica retornados:', data);
       setClinicData(data);
     } catch (error) {
