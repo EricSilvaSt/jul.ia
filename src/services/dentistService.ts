@@ -36,6 +36,17 @@ export const buscarDentistas = async (clinicaId: string): Promise<DentistaComple
   console.log('  - clinicaId recebido:', clinicaId);
   console.log('  - Tipo do clinicaId:', typeof clinicaId);
   
+  // Primeiro, testar query simples sem JOINs
+  console.log('🦷 DEBUG - Testando query simples primeiro...');
+  const { data: simpleData, error: simpleError } = await supabase
+    .from('dentistas')
+    .select('*')
+    .eq('clinica_id', clinicaId);
+    
+  console.log('🦷 DEBUG - Query simples resultado:', { simpleData, simpleError });
+  console.log('🦷 DEBUG - Registros encontrados na query simples:', simpleData?.length || 0);
+  
+  // Se a query simples funcionar, tentar com JOINs opcionais
   const { data, error } = await supabase
     .from('dentistas')
     .select(`
@@ -46,11 +57,11 @@ export const buscarDentistas = async (clinicaId: string): Promise<DentistaComple
       cro,
       disponibilidade,
       criado_em,
-      especialidades (
+      especialidades!left (
         id_especialidade,
         nome_especialidade
       ),
-      usuario (
+      usuario!left (
         usuario_id,
         nome,
         email,
@@ -67,6 +78,12 @@ export const buscarDentistas = async (clinicaId: string): Promise<DentistaComple
 
   if (error) {
     console.error('❌ DEBUG - Erro na query do Supabase:', error);
+    console.error('❌ DEBUG - Detalhes do erro:', {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint
+    });
     throw new Error(`Erro ao buscar dentistas: ${error.message}`);
   }
 
