@@ -32,6 +32,10 @@ export interface CreateDentistaData {
  * Busca dentistas da clínica
  */
 export const buscarDentistas = async (clinicaId: string): Promise<DentistaCompleto[]> => {
+  console.log('🦷 DEBUG - buscarDentistas iniciado');
+  console.log('  - clinicaId recebido:', clinicaId);
+  console.log('  - Tipo do clinicaId:', typeof clinicaId);
+  
   const { data, error } = await supabase
     .from('dentistas')
     .select(`
@@ -56,10 +60,17 @@ export const buscarDentistas = async (clinicaId: string): Promise<DentistaComple
     .eq('clinica_id', clinicaId)
     .order('criado_em', { ascending: false });
 
+  console.log('🦷 DEBUG - Resultado da query:');
+  console.log('  - data:', data);
+  console.log('  - error:', error);
+  console.log('  - Total de registros encontrados:', data?.length || 0);
+
   if (error) {
+    console.error('❌ DEBUG - Erro na query do Supabase:', error);
     throw new Error(`Erro ao buscar dentistas: ${error.message}`);
   }
 
+  console.log('✅ DEBUG - Query executada com sucesso');
   return data || [];
 };
 

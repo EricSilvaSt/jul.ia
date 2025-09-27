@@ -26,6 +26,7 @@ const DentistsPage: React.FC = () => {
     const loadDentists = async () => {
       console.log('🦷 DEBUG - loadDentists iniciado');
       console.log('  - user.clinicId:', user?.clinicId);
+      console.log('  - permissions:', permissions);
       
       if (!user?.clinicId) {
         console.log('❌ DEBUG - Sem clinicId, parando execução');
@@ -38,6 +39,7 @@ const DentistsPage: React.FC = () => {
         console.log('🦷 DEBUG - Chamando buscarDentistas...');
         const data = await buscarDentistas(user.clinicId);
         console.log('🦷 DEBUG - Dados retornados:', data);
+        console.log('🦷 DEBUG - Processando dados para o estado...');
         
         setDentists(data.map(d => ({
           id: d.dentista_id,
@@ -52,8 +54,11 @@ const DentistsPage: React.FC = () => {
           workingDays: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
           linkedUserId: d.usuario?.usuario_id,
         })));
+        
+        console.log('🦷 DEBUG - Estado atualizado com', data.length, 'dentistas');
       } catch (error) {
         console.error('❌ DEBUG - Erro ao carregar dentistas:', error);
+        console.error('❌ DEBUG - Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
         setDentists([]);
       } finally {
         setIsLoading(false);
