@@ -57,11 +57,11 @@ export const buscarDentistas = async (clinicaId: string): Promise<DentistaComple
       cro,
       disponibilidade,
       criado_em,
-      especialidades!left (
+      especialidades!dentistas_especialidade_fkey (
         id_especialidade,
         nome_especialidade
       ),
-      usuario!left (
+      usuario!dentistas_dentista_id_fkey (
         usuario_id,
         nome,
         email,
