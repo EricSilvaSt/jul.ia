@@ -36,11 +36,12 @@ export interface Dentist {
   cro: string; // Registro no Conselho Regional de Odontologia
   isActive: boolean;
   createdAt: string;
-  workingHours: {
-    start: string;
-    end: string;
+  availability: {
+    [key: string]: {
+      inicio: string;
+      fim: string;
+    };
   };
-  workingDays: string[];
   linkedUserId?: string; // ID do usuário vinculado
 }
 

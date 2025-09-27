@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Plus, Trash2 } from 'lucide-react';
 import { Dentist } from '../../types';
+import { buscarEspecialidades } from '../../services/dentistService';
 
 interface DentistModalProps {
   isOpen: boolean;
@@ -9,27 +10,19 @@ interface DentistModalProps {
   onSave: (dentist: Omit<Dentist, 'id' | 'createdAt'>) => void;
 }
 
-const specializations = [
-  'Clínico Geral',
-  'Ortodontista',
-  'Periodontista',
-  'Endodontista',
-  'Cirurgião Oral',
-  'Odontopediatra',
-  'Protesista',
-  'Implantodontista',
-  'Radiologista',
-  'Patologista Oral',
-];
+interface Especialidade {
+  id_especialidade: number;
+  nome_especialidade: string;
+}
 
 const weekDays = [
-  'Segunda',
-  'Terça',
-  'Quarta',
-  'Quinta',
-  'Sexta',
-  'Sábado',
-  'Domingo',
+  { key: 'segunda', label: 'Segunda-feira' },
+  { key: 'terca', label: 'Terça-feira' },
+  { key: 'quarta', label: 'Quarta-feira' },
+  { key: 'quinta', label: 'Quinta-feira' },
+  { key: 'sexta', label: 'Sexta-feira' },
+  { key: 'sabado', label: 'Sábado' },
+  { key: 'domingo', label: 'Domingo' },
 ];
 
 const DentistModal: React.FC<DentistModalProps> = ({
@@ -38,17 +31,33 @@ const DentistModal: React.FC<DentistModalProps> = ({
   dentist,
   onSave,
 }) => {
+  const [especialidades, setEspecialidades] = useState<Especialidade[]>([]);
   const [formData, setFormData] = useState<Omit<Dentist, 'id' | 'createdAt'>>({
     name: '',
     email: '',
     phoneNumber: '',
-    specialization: 'Clínico Geral',
+    specialization: '',
     cro: '',
     isActive: true,
-    workingHours: { start: '08:00', end: '17:00' },
-    workingDays: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
+    availability: {},
     linkedUserId: undefined,
   });
+
+  // Carregar especialidades
+  useEffect(() => {
+    const loadEspecialidades = async () => {
+      try {
+        const data = await buscarEspecialidades();
+        setEspecialidades(data);
+      } catch (error) {
+        console.error('Erro ao carregar especialidades:', error);
+      }
+    };
+
+    if (isOpen) {
+      loadEspecialidades();
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (dentist) {
@@ -59,8 +68,7 @@ const DentistModal: React.FC<DentistModalProps> = ({
         specialization: dentist.specialization,
         cro: dentist.cro,
         isActive: dentist.isActive,
-        workingHours: dentist.workingHours,
-        workingDays: dentist.workingDays,
+        availability: dentist.availability || {},
         linkedUserId: dentist.linkedUserId,
       });
     } else {
@@ -68,11 +76,10 @@ const DentistModal: React.FC<DentistModalProps> = ({
         name: '',
         email: '',
         phoneNumber: '',
-        specialization: 'Clínico Geral',
+        specialization: '',
         cro: '',
         isActive: true,
-        workingHours: { start: '08:00', end: '17:00' },
-        workingDays: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
+        availability: {},
         linkedUserId: undefined,
       });
     }
@@ -83,16 +90,7 @@ const DentistModal: React.FC<DentistModalProps> = ({
   ) => {
     const { name, value, type } = e.target;
     
-    if (name === 'workingHours.start' || name === 'workingHours.end') {
-      const field = name.split('.')[1] as 'start' | 'end';
-      setFormData(prev => ({
-        ...prev,
-        workingHours: {
-          ...prev.workingHours,
-          [field]: value,
-        },
-      }));
-    } else if (type === 'checkbox') {
+    if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
       if (name === 'isActive') {
         setFormData(prev => ({ ...prev, isActive: checked }));
@@ -102,13 +100,41 @@ const DentistModal: React.FC<DentistModalProps> = ({
     }
   };
 
-  const handleWorkingDayChange = (day: string, checked: boolean) => {
+  const handleAvailabilityChange = (day: string, field: 'inicio' | 'fim', value: string) => {
     setFormData(prev => ({
       ...prev,
-      workingDays: checked
-        ? [...prev.workingDays, day]
-        : prev.workingDays.filter(d => d !== day),
+      availability: {
+        ...prev.availability,
+        [day]: {
+          ...prev.availability[day],
+          [field]: value,
+        },
+      },
     }));
+  };
+
+  const addWorkingDay = (day: string) => {
+    setFormData(prev => ({
+      ...prev,
+      availability: {
+        ...prev.availability,
+        [day]: {
+          inicio: '08:00',
+          fim: '17:00',
+        },
+      },
+    }));
+  };
+
+  const removeWorkingDay = (day: string) => {
+    setFormData(prev => {
+      const newAvailability = { ...prev.availability };
+      delete newAvailability[day];
+      return {
+        ...prev,
+        availability: newAvailability,
+      };
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -121,7 +147,7 @@ const DentistModal: React.FC<DentistModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold text-gray-800">
             {dentist ? 'Editar Dentista' : 'Novo Dentista'}
@@ -135,144 +161,164 @@ const DentistModal: React.FC<DentistModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nome Completo *
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email *
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Telefone *
-              </label>
-              <input
-                type="tel"
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                CRO *
-              </label>
-              <input
-                type="text"
-                name="cro"
-                value={formData.cro}
-                onChange={handleChange}
-                placeholder="Ex: CRO-SP 12345"
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Especialização *
-              </label>
-              <select
-                name="specialization"
-                value={formData.specialization}
-                onChange={handleChange}
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                required
-              >
-                {specializations.map((spec) => (
-                  <option key={spec} value={spec}>
-                    {spec}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                name="isActive"
-                checked={formData.isActive}
-                onChange={handleChange}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label className="ml-2 block text-sm text-gray-700">
-                Dentista ativo
-              </label>
-            </div>
-          </div>
-
+          {/* Informações Básicas */}
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Horário de Trabalho</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Informações Básicas</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Início
+                  Nome Completo *
                 </label>
                 <input
-                  type="time"
-                  name="workingHours.start"
-                  value={formData.workingHours.start}
+                  type="text"
+                  name="name"
+                  value={formData.name}
                   onChange={handleChange}
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                  required
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Fim
+                  Email *
                 </label>
                 <input
-                  type="time"
-                  name="workingHours.end"
-                  value={formData.workingHours.end}
+                  type="email"
+                  name="email"
+                  value={formData.email}
                   onChange={handleChange}
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                  required
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Telefone *
+                </label>
+                <input
+                  type="tel"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  CRO *
+                </label>
+                <input
+                  type="text"
+                  name="cro"
+                  value={formData.cro}
+                  onChange={handleChange}
+                  placeholder="Ex: CRO-SP 12345"
+                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Especialização *
+                </label>
+                <select
+                  name="specialization"
+                  value={formData.specialization}
+                  onChange={handleChange}
+                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                  required
+                >
+                  <option value="">Selecione uma especialização</option>
+                  {especialidades.map((esp) => (
+                    <option key={esp.id_especialidade} value={esp.nome_especialidade}>
+                      {esp.nome_especialidade}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="isActive"
+                  checked={formData.isActive}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label className="ml-2 block text-sm text-gray-700">
+                  Dentista ativo
+                </label>
               </div>
             </div>
           </div>
 
+          {/* Horários de Trabalho */}
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Dias de Trabalho</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              {weekDays.map((day) => (
-                <div key={day} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id={`day-${day}`}
-                    checked={formData.workingDays.includes(day)}
-                    onChange={(e) => handleWorkingDayChange(day, e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor={`day-${day}`} className="ml-2 block text-sm text-gray-700">
-                    {day}
-                  </label>
-                </div>
-              ))}
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Horários de Trabalho por Dia</h3>
+            
+            <div className="space-y-4">
+              {weekDays.map((day) => {
+                const isWorking = formData.availability[day.key];
+                
+                return (
+                  <div key={day.key} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-medium text-gray-800">{day.label}</h4>
+                      {isWorking ? (
+                        <button
+                          type="button"
+                          onClick={() => removeWorkingDay(day.key)}
+                          className="flex items-center text-red-600 hover:text-red-800 text-sm"
+                        >
+                          <Trash2 size={16} className="mr-1" />
+                          Remover
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => addWorkingDay(day.key)}
+                          className="flex items-center text-blue-600 hover:text-blue-800 text-sm"
+                        >
+                          <Plus size={16} className="mr-1" />
+                          Adicionar
+                        </button>
+                      )}
+                    </div>
+                    
+                    {isWorking && (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Horário de Início
+                          </label>
+                          <input
+                            type="time"
+                            value={formData.availability[day.key]?.inicio || '08:00'}
+                            onChange={(e) => handleAvailabilityChange(day.key, 'inicio', e.target.value)}
+                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Horário de Fim
+                          </label>
+                          <input
+                            type="time"
+                            value={formData.availability[day.key]?.fim || '17:00'}
+                            onChange={(e) => handleAvailabilityChange(day.key, 'fim', e.target.value)}
+                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
 

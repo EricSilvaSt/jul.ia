@@ -9,11 +9,8 @@ export interface DentistaCompleto {
   email?: string;
   telefone?: string;
   ativo?: boolean;
-  horario_inicio?: string;
-  horario_fim?: string;
-  dias_trabalho?: string[];
-  usuario_id?: string;
   disponibilidade?: any;
+  usuario_id?: string;
   criado_em: string;
   especialidades?: {
     id_especialidade: number;
@@ -35,11 +32,8 @@ export interface CreateDentistaData {
   email?: string;
   telefone?: string;
   ativo?: boolean;
-  horario_inicio?: string;
-  horario_fim?: string;
-  dias_trabalho?: string[];
-  usuario_id?: string;
   disponibilidade?: any;
+  usuario_id?: string;
 }
 
 /**
