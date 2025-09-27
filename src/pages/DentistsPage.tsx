@@ -4,7 +4,7 @@ import DentistCard from '../components/Dentists/DentistCard';
 import DentistModal from '../components/Dentists/DentistModal';
 import { Dentist } from '../types';
 import { useAuth } from '../hooks/useAuth';
-import { buscarDentistas, criarDentista, atualizarDentista, deletarDentista } from '../services/dentistService';
+import { buscarDentistas, criarDentista, atualizarDentista, deletarDentista, buscarEspecialidades } from '../services/dentistService';
 
 
 const DentistsPage: React.FC = () => {
@@ -50,11 +50,7 @@ const DentistsPage: React.FC = () => {
           cro: d.cro,
           isActive: d.ativo ?? d.usuario?.ativo ?? true,
           createdAt: d.criado_em,
-          workingHours: { 
-            start: d.horario_inicio || '08:00', 
-            end: d.horario_fim || '17:00' 
-          },
-          workingDays: d.dias_trabalho || ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
+          availability: d.disponibilidade || {},
           linkedUserId: d.usuario?.usuario_id,
         })));
         
@@ -112,21 +108,11 @@ const DentistsPage: React.FC = () => {
     try {
       console.log('🦷 DEBUG - Preparando dados para salvar...');
       
-      // Mapear especialização para ID
-      const especialidadeMap: { [key: string]: number } = {
-        'Clínico Geral': 1,
-        'Ortodontia': 2,
-        'Periodontia': 3,
-        'Endodontia': 4,
-        'Cirurgião Oral': 5,
-        'Odontopediatria': 6,
-        'Protesista': 7,
-        'Implantodontista': 8,
-        'Radiologista': 9,
-        'Estética': 10
-      };
+      // Buscar ID da especialidade pelo nome
+      const especialidades = await buscarEspecialidades();
+      const especialidadeEncontrada = especialidades.find(e => e.nome_especialidade === dentistData.specialization);
+      const especialidadeId = especialidadeEncontrada?.id_especialidade || 1;
       
-      const especialidadeId = especialidadeMap[dentistData.specialization] || 1;
       console.log('🦷 DEBUG - Especialidade mapeada:', dentistData.specialization, '->', especialidadeId);
       
       if (selectedDentist) {
@@ -139,10 +125,8 @@ const DentistsPage: React.FC = () => {
           especialidade: especialidadeId,
           cro: dentistData.cro,
           ativo: dentistData.isActive,
-          horario_inicio: dentistData.workingHours.start,
-          horario_fim: dentistData.workingHours.end,
-          dias_trabalho: dentistData.workingDays,
           clinica_id: user.clinicId,
+          disponibilidade: dentistData.availability,
         });
       } else {
         console.log('🦷 DEBUG - Criando novo dentista');
@@ -154,9 +138,7 @@ const DentistsPage: React.FC = () => {
           especialidade: especialidadeId,
           cro: dentistData.cro,
           ativo: dentistData.isActive,
-          horario_inicio: dentistData.workingHours.start,
-          horario_fim: dentistData.workingHours.end,
-          dias_trabalho: dentistData.workingDays,
+          disponibilidade: dentistData.availability,
           clinica_id: user.clinicId,
         });
       }
@@ -175,11 +157,7 @@ const DentistsPage: React.FC = () => {
         cro: d.cro,
         isActive: d.ativo ?? d.usuario?.ativo ?? true,
         createdAt: d.criado_em,
-        workingHours: { 
-          start: d.horario_inicio || '08:00', 
-          end: d.horario_fim || '17:00' 
-        },
-        workingDays: d.dias_trabalho || ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
+        availability: d.disponibilidade || {},
         linkedUserId: d.usuario?.usuario_id,
       })));
       

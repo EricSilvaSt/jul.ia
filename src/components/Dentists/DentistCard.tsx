@@ -64,16 +64,23 @@ const DentistCard: React.FC<DentistCardProps> = ({
           <span>{dentist.cro}</span>
         </div>
         
-        <div className="flex items-center text-sm">
-          <Clock size={16} className="text-gray-500 mr-2" />
-          <span>
-            {dentist.workingHours.start} - {dentist.workingHours.end}
-          </span>
-        </div>
-
         <div className="text-sm">
-          <span className="text-gray-500">Dias: </span>
-          <span>{dentist.workingDays.join(', ')}</span>
+          <span className="text-gray-500 flex items-center mb-1">
+            <Clock size={16} className="mr-1" />
+            Horários:
+          </span>
+          <div className="text-xs space-y-1">
+            {Object.keys(dentist.availability).length > 0 ? (
+              Object.entries(dentist.availability).map(([day, schedule]) => (
+                <div key={day} className="flex justify-between">
+                  <span className="capitalize">{day}:</span>
+                  <span>{schedule.inicio} - {schedule.fim}</span>
+                </div>
+              ))
+            ) : (
+              <span className="text-gray-400">Horários não definidos</span>
+            )}
+          </div>
         </div>
 
         {dentist.linkedUserId && (
