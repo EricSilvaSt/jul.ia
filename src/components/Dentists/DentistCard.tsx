@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Clock, Phone, Mail, Edit, Trash2, UserX, UserCheck, Badge } from 'lucide-react';
+import { User, Clock, Phone, Mail, CreditCard as Edit, Trash2, UserX, UserCheck, Badge } from 'lucide-react';
 import { Dentist } from '../../types';
 
 interface DentistCardProps {
