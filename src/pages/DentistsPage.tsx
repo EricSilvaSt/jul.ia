@@ -99,32 +99,58 @@ const DentistsPage: React.FC = () => {
   };
 
   const handleSaveDentist = async (dentistData: Omit<Dentist, 'id' | 'createdAt'>) => {
+    console.log('🦷 DEBUG - handleSaveDentist chamado:', dentistData);
+    
     if (!user?.clinicId) {
       alert('Erro: ID da clínica não encontrado');
       return;
     }
     
     try {
+      console.log('🦷 DEBUG - Preparando dados para salvar...');
+      
+      // Mapear especialização para ID
+      const especialidadeMap: { [key: string]: number } = {
+        'Clínico Geral': 1,
+        'Ortodontia': 2,
+        'Periodontia': 3,
+        'Endodontia': 4,
+        'Cirurgião Oral': 5,
+        'Odontopediatria': 6,
+        'Protesista': 7,
+        'Implantodontista': 8,
+        'Radiologista': 9,
+        'Estética': 10
+      };
+      
+      const especialidadeId = especialidadeMap[dentistData.specialization] || 1;
+      console.log('🦷 DEBUG - Especialidade mapeada:', dentistData.specialization, '->', especialidadeId);
+      
       if (selectedDentist) {
+        console.log('🦷 DEBUG - Editando dentista existente:', selectedDentist.id);
         // Editar dentista existente
         await atualizarDentista(selectedDentist.id, {
           nome: dentistData.name,
-          especialidade: 1, // TODO: mapear especialização para ID
+          especialidade: especialidadeId,
           cro: dentistData.cro,
           clinica_id: user.clinicId,
         });
       } else {
+        console.log('🦷 DEBUG - Criando novo dentista');
         // Adicionar novo dentista
         await criarDentista({
           nome: dentistData.name,
-          especialidade: 1, // TODO: mapear especialização para ID
+          especialidade: especialidadeId,
           cro: dentistData.cro,
           clinica_id: user.clinicId,
         });
       }
       
+      console.log('🦷 DEBUG - Dentista salvo, recarregando lista...');
       // Recarregar lista
       const data = await buscarDentistas(user.clinicId);
+      console.log('🦷 DEBUG - Lista recarregada:', data.length, 'dentistas');
+      
       setDentists(data.map(d => ({
         id: d.dentista_id,
         name: d.nome,
@@ -139,13 +165,15 @@ const DentistsPage: React.FC = () => {
         linkedUserId: d.usuario?.usuario_id,
       })));
       
+      setIsModalOpen(false);
+      setSelectedDentist(null);
+      console.log('🦷 DEBUG - Modal fechado, operação concluída');
+      
     } catch (error) {
       console.error('Erro ao salvar dentista:', error);
       alert('Erro ao salvar dentista. Tente novamente.');
+      return; // Não fechar modal em caso de erro
     }
-    
-    setIsModalOpen(false);
-    setSelectedDentist(null);
   };
 
   const handleToggleActive = (dentistId: string) => {

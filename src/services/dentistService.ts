@@ -29,91 +29,73 @@ export interface CreateDentistaData {
 }
 
 /**
- * Busca dentistas da clínica
+ * Busca dentistas da clínica - VERSÃO SIMPLIFICADA
  */
 export const buscarDentistas = async (clinicaId: string): Promise<DentistaCompleto[]> => {
-  console.log('🦷 DEBUG - buscarDentistas iniciado');
-  console.log('  - clinicaId recebido:', clinicaId);
-  console.log('  - Tipo do clinicaId:', typeof clinicaId);
+  console.log('🦷 DEBUG - buscarDentistas SIMPLIFICADO');
+  console.log('  - clinicaId:', clinicaId);
   
-  // Primeiro, testar query simples sem JOINs
-  console.log('🦷 DEBUG - Testando query simples primeiro...');
-  const { data: simpleData, error: simpleError } = await supabase
-    .from('dentistas')
-    .select('*')
-    .eq('clinica_id', clinicaId);
-    
-  console.log('🦷 DEBUG - Query simples resultado:', { simpleData, simpleError });
-  console.log('🦷 DEBUG - Registros encontrados na query simples:', simpleData?.length || 0);
-  
-  // Se a query simples funcionar, tentar com JOINs opcionais
+  // Query mais simples possível - só os dados básicos
   const { data, error } = await supabase
     .from('dentistas')
-    .select(`
-      dentista_id,
-      clinica_id,
-      nome,
-      especialidade,
-      cro,
-      disponibilidade,
-      criado_em,
-      especialidades:especialidade (
-        id_especialidade,
-        nome_especialidade
-      ),
-      usuario!usuario_dentista_id_fkey (
-        usuario_id,
-        nome,
-        email,
-        ativo
-      )
-    `)
+    .select('*')
     .eq('clinica_id', clinicaId)
     .order('criado_em', { ascending: false });
 
-  console.log('🦷 DEBUG - Resultado da query:');
-  console.log('  - data:', data);
-  console.log('  - error:', error);
-  console.log('  - Total de registros encontrados:', data?.length || 0);
+  console.log('🦷 DEBUG - Resultado simples:', { data, error });
 
   if (error) {
-    console.error('❌ DEBUG - Erro na query do Supabase:', error);
-    console.error('❌ DEBUG - Detalhes do erro:', {
-      code: error.code,
-      message: error.message,
-      details: error.details,
-      hint: error.hint
-    });
+    console.error('❌ DEBUG - Erro:', error);
     throw new Error(`Erro ao buscar dentistas: ${error.message}`);
   }
 
-  console.log('✅ DEBUG - Query executada com sucesso');
-  return data || [];
+  // Buscar especialidades separadamente para cada dentista
+  const dentistasComEspecialidades = await Promise.all(
+    (data || []).map(async (dentista) => {
+      let especialidadeNome = 'Não informado';
+      
+      if (dentista.especialidade) {
+        const { data: espData } = await supabase
+          .from('especialidades')
+          .select('nome_especialidade')
+          .eq('id_especialidade', dentista.especialidade)
+          .single();
+        
+        if (espData) {
+          especialidadeNome = espData.nome_especialidade;
+        }
+      }
+
+      return {
+        ...dentista,
+        especialidades: {
+          id_especialidade: dentista.especialidade,
+          nome_especialidade: especialidadeNome
+        }
+      };
+    })
+  );
+
+  console.log('✅ DEBUG - Dentistas processados:', dentistasComEspecialidades.length);
+  return dentistasComEspecialidades;
 };
 
 /**
  * Cria novo dentista
  */
 export const criarDentista = async (dentistaData: CreateDentistaData): Promise<DentistaCompleto> => {
+  console.log('🦷 DEBUG - Criando dentista:', dentistaData);
+  
   const { data, error } = await supabase
     .from('dentistas')
     .insert([dentistaData])
-    .select(`
-      dentista_id,
-      clinica_id,
-      nome,
-      especialidade,
-      cro,
-      disponibilidade,
-      criado_em,
-      especialidades (
-        id_especialidade,
-        nome_especialidade
-      )
-    `)
+    .select('*')
     .single();
 
+  console.log('🦷 DEBUG - Resultado criação:', { data, error });
+
   if (error) {
+    console.error('❌ DEBUG - Erro ao criar:', error);
     throw new Error(`Erro ao criar dentista: ${error.message}`);
   }
 
@@ -127,12 +109,15 @@ export const atualizarDentista = async (
   dentistaId: string, 
   updates: Partial<CreateDentistaData>
 ): Promise<void> => {
+  console.log('🦷 DEBUG - Atualizando dentista:', dentistaId, updates);
+  
   const { error } = await supabase
     .from('dentistas')
     .update(updates)
     .eq('dentista_id', dentistaId);
 
   if (error) {
+    console.error('❌ DEBUG - Erro ao atualizar:', error);
     throw new Error(`Erro ao atualizar dentista: ${error.message}`);
   }
 };
@@ -141,12 +126,15 @@ export const atualizarDentista = async (
  * Deleta dentista
  */
 export const deletarDentista = async (dentistaId: string): Promise<void> => {
+  console.log('🦷 DEBUG - Deletando dentista:', dentistaId);
+  
   const { error } = await supabase
     .from('dentistas')
     .delete()
     .eq('dentista_id', dentistaId);
 
   if (error) {
+    console.error('❌ DEBUG - Erro ao deletar:', error);
     throw new Error(`Erro ao deletar dentista: ${error.message}`);
   }
 };

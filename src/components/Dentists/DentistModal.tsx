@@ -113,6 +113,7 @@ const DentistModal: React.FC<DentistModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('🦷 DEBUG - Salvando dentista:', formData);
     onSave(formData);
   };
 
