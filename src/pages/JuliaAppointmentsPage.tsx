@@ -366,7 +366,7 @@ const JuliaAppointmentsPage: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900 flex items-center">
                         <Calendar size={14} className="mr-1" />
-                        {new Date(appointment.data_solicitada).toLocaleDateString('pt-BR')}
+                        {new Date(appointment.data_solicitada + 'T00:00:00').toLocaleDateString('pt-BR')}
                       </div>
                       <div className="text-sm text-gray-500 flex items-center">
                         <Clock size={14} className="mr-1" />
