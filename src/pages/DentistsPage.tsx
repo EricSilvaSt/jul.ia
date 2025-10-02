@@ -4,7 +4,7 @@ import DentistCard from '../components/Dentists/DentistCard';
 import DentistModal from '../components/Dentists/DentistModal';
 import { Dentist } from '../types';
 import { useAuth } from '../hooks/useAuth';
-import { buscarDentistas, criarDentista, atualizarDentista, deletarDentista, buscarEspecialidades } from '../services/dentistService';
+import { buscarDentistas, criarDentista, atualizarDentista, deletarDentista, buscarEspecialidades, alternarStatusDentista } from '../services/dentistService';
 
 
 const DentistsPage: React.FC = () => {
@@ -16,30 +16,17 @@ const DentistsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { user, permissions } = useAuth();
 
-  console.log('🦷 DEBUG - DentistsPage iniciado');
-  console.log('  - user:', user);
-  console.log('  - user.clinicId:', user?.clinicId);
-  console.log('  - permissions:', permissions);
-
   // Carregar dentistas do Supabase
   useEffect(() => {
     const loadDentists = async () => {
-      console.log('🦷 DEBUG - loadDentists iniciado');
-      console.log('  - user.clinicId:', user?.clinicId);
-      console.log('  - permissions:', permissions);
-      
       if (!user?.clinicId) {
-        console.log('❌ DEBUG - Sem clinicId, parando execução');
         setIsLoading(false);
         return;
       }
       
       try {
         setIsLoading(true);
-        console.log('🦷 DEBUG - Chamando buscarDentistas...');
         const data = await buscarDentistas(user.clinicId);
-        console.log('🦷 DEBUG - Dados retornados:', data);
-        console.log('🦷 DEBUG - Processando dados para o estado...');
         
         setDentists(data.map(d => ({
           id: d.dentista_id,
@@ -54,10 +41,8 @@ const DentistsPage: React.FC = () => {
           linkedUserId: d.usuario?.usuario_id,
         })));
         
-        console.log('🦷 DEBUG - Estado atualizado com', data.length, 'dentistas');
       } catch (error) {
         console.error('❌ DEBUG - Erro ao carregar dentistas:', error);
-        console.error('❌ DEBUG - Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
         setDentists([]);
       } finally {
         setIsLoading(false);
@@ -98,25 +83,18 @@ const DentistsPage: React.FC = () => {
   };
 
   const handleSaveDentist = async (dentistData: Omit<Dentist, 'id' | 'createdAt'>) => {
-    console.log('🦷 DEBUG - handleSaveDentist chamado:', dentistData);
-    
     if (!user?.clinicId) {
       alert('Erro: ID da clínica não encontrado');
       return;
     }
     
     try {
-      console.log('🦷 DEBUG - Preparando dados para salvar...');
-      
       // Buscar ID da especialidade pelo nome
       const especialidades = await buscarEspecialidades();
       const especialidadeEncontrada = especialidades.find(e => e.nome_especialidade === dentistData.specialization);
       const especialidadeId = especialidadeEncontrada?.id_especialidade || 1;
       
-      console.log('🦷 DEBUG - Especialidade mapeada:', dentistData.specialization, '->', especialidadeId);
-      
       if (selectedDentist) {
-        console.log('🦷 DEBUG - Editando dentista existente:', selectedDentist.id);
         // Editar dentista existente
         await atualizarDentista(selectedDentist.id, {
           nome: dentistData.name,
@@ -129,7 +107,6 @@ const DentistsPage: React.FC = () => {
           disponibilidade: dentistData.availability,
         });
       } else {
-        console.log('🦷 DEBUG - Criando novo dentista');
         // Adicionar novo dentista
         await criarDentista({
           nome: dentistData.name,
@@ -143,10 +120,8 @@ const DentistsPage: React.FC = () => {
         });
       }
       
-      console.log('🦷 DEBUG - Dentista salvo, recarregando lista...');
       // Recarregar lista
       const data = await buscarDentistas(user.clinicId);
-      console.log('🦷 DEBUG - Lista recarregada:', data.length, 'dentistas');
       
       setDentists(data.map(d => ({
         id: d.dentista_id,
@@ -163,7 +138,6 @@ const DentistsPage: React.FC = () => {
       
       setIsModalOpen(false);
       setSelectedDentist(null);
-      console.log('🦷 DEBUG - Modal fechado, operação concluída');
       
     } catch (error) {
       console.error('Erro ao salvar dentista:', error);
@@ -172,9 +146,18 @@ const DentistsPage: React.FC = () => {
     }
   };
 
-  const handleToggleActive = (dentistId: string) => {
-    // TODO: Implementar toggle de status no Supabase
-    console.log('Toggle status dentista:', dentistId);
+  const handleToggleActive = async (dentistId: string) => {
+    try {
+      await alternarStatusDentista(dentistId);
+      
+      // Atualizar estado local
+      setDentists(dentists.map(d => 
+        d.id === dentistId ? { ...d, isActive: !d.isActive } : d
+      ));
+    } catch (error) {
+      console.error('Erro ao alterar status:', error);
+      alert('Erro ao alterar status do dentista. Tente novamente.');
+    }
   };
 
   const handleDeleteDentist = async (dentistId: string) => {
@@ -198,6 +181,10 @@ const DentistsPage: React.FC = () => {
       </div>
     );
   }
+
+  // Verificar se usuário é administrador para habilitar operações CRUD
+  const isAdmin = user?.role === 'admin' || user?.role === 'clinic';
+
   const filteredDentists = dentists.filter((dentist) => {
     const matchesSearch = 
       dentist.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -223,11 +210,25 @@ const DentistsPage: React.FC = () => {
         <button
           onClick={handleAddDentist}
           className="mt-4 md:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+          disabled={!isAdmin}
         >
           <Plus size={20} className="mr-2" />
           Adicionar Dentista
         </button>
       </div>
+
+      {!isAdmin && (
+        <div className="mb-4 bg-yellow-50 border-l-4 border-yellow-400 p-4">
+          <div className="flex">
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                <strong>Modo Somente Leitura:</strong> Você pode visualizar os dentistas, mas não pode editá-los, adicioná-los ou removê-los. 
+                Apenas administradores da clínica têm essas permissões.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mb-6 space-y-4">
         <div className="relative">
@@ -291,6 +292,7 @@ const DentistsPage: React.FC = () => {
               onEdit={handleEditDentist}
               onToggleActive={handleToggleActive}
               onDelete={handleDeleteDentist}
+              isAdmin={isAdmin}
             />
           ))}
         </div>

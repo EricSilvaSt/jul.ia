@@ -7,13 +7,15 @@ interface DentistCardProps {
   onEdit: (dentist: Dentist) => void;
   onToggleActive: (dentistId: string) => void;
   onDelete: (dentistId: string) => void;
+  isAdmin?: boolean;
 }
 
 const DentistCard: React.FC<DentistCardProps> = ({ 
   dentist, 
   onEdit, 
   onToggleActive, 
-  onDelete 
+  onDelete,
+  isAdmin = false
 }) => {
   return (
     <div className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg ${
@@ -93,7 +95,8 @@ const DentistCard: React.FC<DentistCardProps> = ({
       </div>
       
       <div className="p-4 bg-gray-50 border-t border-gray-200">
-        <div className="flex space-x-2">
+        {isAdmin ? (
+          <div className="flex space-x-2">
           <button 
             onClick={() => onEdit(dentist)}
             className="flex-1 flex items-center justify-center py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 text-sm"
@@ -127,7 +130,14 @@ const DentistCard: React.FC<DentistCardProps> = ({
           >
             <Trash2 size={16} />
           </button>
-        </div>
+          </div>
+        ) : (
+          <div className="text-center py-2">
+            <span className="text-sm text-gray-500">
+              Apenas administradores podem editar dentistas
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
