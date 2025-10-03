@@ -57,7 +57,7 @@ export const buscarDentistas = async (clinicaId: string): Promise<DentistaComple
         id_especialidade,
         nome_especialidade
       ),
-      usuario (
+      usuario:usuario_id (
         usuario_id,
         nome,
         email,
