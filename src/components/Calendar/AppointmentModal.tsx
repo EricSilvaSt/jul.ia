@@ -3,7 +3,6 @@ import { X } from 'lucide-react';
 import { Appointment, Dentist } from '../../types';
 import { convertToUTC, convertFromUTC, calculateEndTime } from '../../utils/timezone';
 import { marcarAgendamento } from '../../services/appointmentService';
-import { obterHorariosDisponiveis } from '../../services/dentistService';
 
 interface AppointmentModalProps {
   isOpen: boolean;
@@ -67,33 +66,6 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
     }
     return '09:00';
   });
-  
-  const [availableHours, setAvailableHours] = useState<string[]>([]);
-  const [isLoadingHours, setIsLoadingHours] = useState(false);
-
-  // Carregar horários disponíveis quando dentista ou data mudam
-  useEffect(() => {
-    const loadAvailableHours = async () => {
-      if (!formData.dentistId || !localDate) return;
-      
-      setIsLoadingHours(true);
-      try {
-        const hours = await obterHorariosDisponiveis(
-          formData.dentistId,
-          localDate,
-          formData.duracao_minutos
-        );
-        setAvailableHours(hours);
-      } catch (error) {
-        console.error('Erro ao carregar horários:', error);
-        setAvailableHours([]);
-      } finally {
-        setIsLoadingHours(false);
-      }
-    };
-
-    loadAvailableHours();
-  }, [formData.dentistId, localDate, formData.duracao_minutos]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -193,38 +165,14 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Horário
               </label>
-              {formData.dentistId && availableHours.length > 0 ? (
-                <select
-                  name="localTime"
-                  value={localTime}
-                  onChange={handleChange}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                  required
-                  disabled={isLoadingHours}
-                >
-                  <option value="">Selecione um horário</option>
-                  {availableHours.map((hour) => (
-                    <option key={hour} value={hour}>
-                      {hour}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  type="time"
-                  name="localTime"
-                  value={localTime}
-                  onChange={handleChange}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                  required
-                />
-              )}
-              {isLoadingHours && (
-                <p className="text-xs text-gray-500 mt-1">Carregando horários disponíveis...</p>
-              )}
-              {formData.dentistId && !isLoadingHours && availableHours.length === 0 && (
-                <p className="text-xs text-red-500 mt-1">Nenhum horário disponível para esta data</p>
-              )}
+              <input
+                type="time"
+                name="localTime"
+                value={localTime}
+                onChange={handleChange}
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                required
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -266,12 +214,6 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
           <div className="text-sm text-gray-500 bg-blue-50 p-3 rounded-md">
             <p className="text-xs text-gray-500 mt-1">
               <strong>Fuso horário:</strong> Horários são exibidos em horário de São Paulo e convertidos automaticamente para UTC no banco de dados.
-              {formData.dentistId && (
-                <>
-                  <br />
-                  <strong>Validação:</strong> Apenas horários dentro da disponibilidade do dentista são exibidos.
-                </>
-              )}
             </p>
           </div>
 
