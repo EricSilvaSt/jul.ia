@@ -83,13 +83,6 @@ const DentistCard: React.FC<DentistCardProps> = ({
           </div>
         </div>
 
-        {dentist.linkedUserId && (
-          <div className="text-sm">
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-              Usuário vinculado
-            </span>
-          </div>
-        )}
       </div>
       
       <div className="p-4 bg-gray-50 border-t border-gray-200">

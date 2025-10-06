@@ -40,50 +40,38 @@ export interface CreateDentistaData {
  * Busca dentistas da clínica - VERSÃO SIMPLIFICADA
  */
 export const buscarDentistas = async (clinicaId: string): Promise<DentistaCompleto[]> => {
-  console.log('🦷 DEBUG - buscarDentistas TESTE BÁSICO');
+  console.log('🦷 DEBUG - buscarDentistas iniciado');
   console.log('  - clinicaId:', clinicaId);
-  console.log('  - Fazendo query SEM filtro primeiro...');
   
-  // TESTE 1: Query sem filtro para ver se retorna ALGUM dentista
   const { data, error } = await supabase
     .from('dentistas')
-    .select('*');
+    .select(`
+      dentista_id,
+      clinica_id,
+      nome,
+      especialidade,
+      cro,
+      email,
+      telefone,
+      ativo,
+      disponibilidade,
+      criado_em,
+      especialidades (
+        id_especialidade,
+        nome_especialidade
+      )
+    `)
+    .eq('clinica_id', clinicaId)
+    .order('nome');
 
-  console.log('🦷 DEBUG - TESTE SEM FILTRO:');
-  console.log('  - Total de dentistas na tabela:', data?.length || 0);
-  console.log('  - Erro:', error);
-  console.log('  - Primeiros 3 registros:', data?.slice(0, 3));
+  console.log('🦷 DEBUG - Resultado da query:', { data, error });
 
   if (error) {
     console.error('❌ DEBUG - Erro:', error);
     throw new Error(`Erro ao buscar dentistas: ${error.message}`);
   }
 
-  // TESTE 2: Agora com filtro da clínica
-  console.log('🦷 DEBUG - Fazendo query COM filtro da clínica...');
-  const { data: filteredData, error: filteredError } = await supabase
-    .from('dentistas')
-    .select('*')
-    .eq('clinica_id', clinicaId);
-
-  console.log('🦷 DEBUG - TESTE COM FILTRO:');
-  console.log('  - Dentistas da clínica:', filteredData?.length || 0);
-  console.log('  - Erro:', filteredError);
-  console.log('  - Dados:', filteredData);
-
-  if (filteredError) {
-    console.error('❌ DEBUG - Erro no filtro:', filteredError);
-    throw new Error(`Erro ao buscar dentistas: ${filteredError.message}`);
-  }
-
-  // Retornar dados básicos sem processamento
-  return (filteredData || []).map(d => ({
-    ...d,
-    especialidades: {
-      id_especialidade: d.especialidade,
-      nome_especialidade: 'Teste'
-    }
-  }));
+  return data || [];
 };
 
 /**

@@ -40,7 +40,6 @@ const DentistModal: React.FC<DentistModalProps> = ({
     cro: '',
     isActive: true,
     availability: {},
-    linkedUserId: undefined,
   });
 
   // Carregar especialidades

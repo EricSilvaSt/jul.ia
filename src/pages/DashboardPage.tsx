@@ -35,15 +35,13 @@ const DashboardPage: React.FC = () => {
           setDentists(dentistData.map(d => ({
             id: d.dentista_id,
             name: d.nome,
-            email: d.usuario?.email || '',
+            email: d.email || '',
             phoneNumber: '',
             specialization: d.especialidades?.nome_especialidade || 'Não informado',
             cro: d.cro,
-            isActive: d.usuario?.ativo ?? true,
+            isActive: d.ativo ?? true,
             createdAt: d.criado_em,
-            workingHours: { start: '08:00', end: '17:00' },
-            workingDays: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
-            linkedUserId: d.usuario?.usuario_id,
+            availability: d.disponibilidade || {},
           })));
         }
         

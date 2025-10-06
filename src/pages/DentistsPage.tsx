@@ -44,14 +44,13 @@ const DentistsPage: React.FC = () => {
         setDentists(data.map(d => ({
           id: d.dentista_id,
           name: d.nome,
-          email: d.email || d.usuario?.email || '',
+          email: d.email || '',
           phoneNumber: d.telefone || '',
           specialization: d.especialidades?.nome_especialidade || 'Não informado',
           cro: d.cro,
-          isActive: d.ativo ?? d.usuario?.ativo ?? true,
+          isActive: d.ativo ?? true,
           createdAt: d.criado_em,
           availability: d.disponibilidade || {},
-          linkedUserId: d.usuario?.usuario_id,
         })));
         
         console.log('🦷 DEBUG - Estado atualizado com', data.length, 'dentistas');
@@ -125,7 +124,6 @@ const DentistsPage: React.FC = () => {
           especialidade: especialidadeId,
           cro: dentistData.cro,
           ativo: dentistData.isActive,
-          clinica_id: user.clinicId,
           disponibilidade: dentistData.availability,
         });
       } else {
@@ -151,14 +149,13 @@ const DentistsPage: React.FC = () => {
       setDentists(data.map(d => ({
         id: d.dentista_id,
         name: d.nome,
-        email: d.email || d.usuario?.email || '',
+        email: d.email || '',
         phoneNumber: d.telefone || '',
         specialization: d.especialidades?.nome_especialidade || 'Não informado',
         cro: d.cro,
-        isActive: d.ativo ?? d.usuario?.ativo ?? true,
+        isActive: d.ativo ?? true,
         createdAt: d.criado_em,
         availability: d.disponibilidade || {},
-        linkedUserId: d.usuario?.usuario_id,
       })));
       
       setIsModalOpen(false);
@@ -172,9 +169,35 @@ const DentistsPage: React.FC = () => {
     }
   };
 
-  const handleToggleActive = (dentistId: string) => {
-    // TODO: Implementar toggle de status no Supabase
-    console.log('Toggle status dentista:', dentistId);
+  const handleToggleActive = async (dentistId: string) => {
+    try {
+      // Encontrar o dentista atual
+      const dentist = dentists.find(d => d.id === dentistId);
+      if (!dentist) return;
+      
+      // Alternar status
+      await atualizarDentista(dentistId, {
+        ativo: !dentist.isActive
+      });
+      
+      // Recarregar lista
+      const data = await buscarDentistas(user.clinicId!);
+      setDentists(data.map(d => ({
+        id: d.dentista_id,
+        name: d.nome,
+        email: d.email || '',
+        phoneNumber: d.telefone || '',
+        specialization: d.especialidades?.nome_especialidade || 'Não informado',
+        cro: d.cro,
+        isActive: d.ativo ?? true,
+        createdAt: d.criado_em,
+        availability: d.disponibilidade || {},
+      })));
+      
+    } catch (error) {
+      console.error('Erro ao alterar status:', error);
+      alert('Erro ao alterar status do dentista. Tente novamente.');
+    }
   };
 
   const handleDeleteDentist = async (dentistId: string) => {

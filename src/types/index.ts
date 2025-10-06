@@ -42,7 +42,6 @@ export interface Dentist {
       fim: string;
     };
   };
-  linkedUserId?: string; // ID do usuário vinculado
 }
 
 export interface Clinic {
