@@ -45,6 +45,7 @@ export interface CreateDentistaData {
 export const buscarDentistas = async (clinicaId: string): Promise<DentistaCompleto[]> => {
   console.log('🦷 DEBUG - buscarDentistas iniciado');
   console.log('  - clinicaId:', clinicaId);
+  console.log('  - clinicaId type:', typeof clinicaId);
   
   const { data, error } = await supabase
     .from('dentistas')
@@ -65,9 +66,11 @@ export const buscarDentistas = async (clinicaId: string): Promise<DentistaComple
       )
     `)
     .eq('clinica_id', clinicaId)
+    .eq('ativo', true)
     .order('nome');
 
   console.log('🦷 DEBUG - Resultado da query:', { data, error });
+  console.log('🦷 DEBUG - Dados encontrados:', data?.length || 0, 'dentistas');
 
   if (error) {
     console.error('❌ DEBUG - Erro:', error);

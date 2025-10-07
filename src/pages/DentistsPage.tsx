@@ -44,18 +44,17 @@ const DentistsPage: React.FC = () => {
         setDentists(data.map(d => ({
           id: d.dentista_id,
           name: d.nome,
-          email: d.email || '',
-          phoneNumber: d.telefone || '',
+          email: d.email || 'Não informado',
+          phoneNumber: d.telefone || 'Não informado',
           specialization: d.especialidades?.nome_especialidade || 'Não informado',
           cro: d.cro,
           isActive: d.ativo ?? true,
           createdAt: d.criado_em,
-          workingHours: { start: '08:00', end: '17:00' },
-          workingDays: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
           availability: d.disponibilidade || {},
         })));
         
         console.log('🦷 DEBUG - Estado atualizado com', data.length, 'dentistas');
+        console.log('🦷 DEBUG - Dentistas processados:', data.map(d => ({ id: d.dentista_id, nome: d.nome, clinica_id: d.clinica_id })));
       } catch (error) {
         console.error('❌ DEBUG - Erro ao carregar dentistas:', error);
         console.error('❌ DEBUG - Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
@@ -147,12 +146,13 @@ const DentistsPage: React.FC = () => {
       // Recarregar lista
       const data = await buscarDentistas(user.clinicId);
       console.log('🦷 DEBUG - Lista recarregada:', data.length, 'dentistas');
+      console.log('🦷 DEBUG - Dados recarregados:', data.map(d => ({ id: d.dentista_id, nome: d.nome })));
       
       setDentists(data.map(d => ({
         id: d.dentista_id,
         name: d.nome,
-        email: d.email || '',
-        phoneNumber: d.telefone || '',
+        email: d.email || 'Não informado',
+        phoneNumber: d.telefone || 'Não informado',
         specialization: d.especialidades?.nome_especialidade || 'Não informado',
         cro: d.cro,
         isActive: d.ativo ?? true,
@@ -186,8 +186,8 @@ const DentistsPage: React.FC = () => {
       setDentists(data.map(d => ({
         id: d.dentista_id,
         name: d.nome,
-        email: d.email || '',
-        phoneNumber: d.telefone || '',
+        email: d.email || 'Não informado',
+        phoneNumber: d.telefone || 'Não informado',
         specialization: d.especialidades?.nome_especialidade || 'Não informado',
         cro: d.cro,
         isActive: d.ativo ?? true,
