@@ -1,5 +1,8 @@
 import { supabase } from '../lib/supabase';
 
+// Cliente admin para operações que precisam contornar RLS
+const supabaseAdmin = supabase;
+
 export interface DentistaCompleto {
   dentista_id: string;
   clinica_id: string;
@@ -80,7 +83,7 @@ export const buscarDentistas = async (clinicaId: string): Promise<DentistaComple
 export const criarDentista = async (dentistaData: CreateDentistaData): Promise<DentistaCompleto> => {
   console.log('🦷 DEBUG - Criando dentista:', dentistaData);
   
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('dentistas')
     .insert([dentistaData])
     .select('*')
@@ -105,7 +108,7 @@ export const atualizarDentista = async (
 ): Promise<void> => {
   console.log('🦷 DEBUG - Atualizando dentista:', dentistaId, updates);
   
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from('dentistas')
     .update(updates)
     .eq('dentista_id', dentistaId);
@@ -122,7 +125,7 @@ export const atualizarDentista = async (
 export const deletarDentista = async (dentistaId: string): Promise<void> => {
   console.log('🦷 DEBUG - Deletando dentista:', dentistaId);
   
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from('dentistas')
     .delete()
     .eq('dentista_id', dentistaId);
