@@ -50,6 +50,8 @@ const DentistsPage: React.FC = () => {
           cro: d.cro,
           isActive: d.ativo ?? true,
           createdAt: d.criado_em,
+          workingHours: { start: '08:00', end: '17:00' },
+          workingDays: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
           availability: d.disponibilidade || {},
         })));
         
