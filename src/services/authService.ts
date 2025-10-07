@@ -52,7 +52,58 @@ export const authenticateUser = async (credentials: LoginCredentials): Promise<A
 
   console.log('Attempting authentication for identifier:', identifier);
 
-  // Tentar autenticação real no Supabase
+  // Primeiro, tentar autenticação com Supabase Auth se o identifier for um email
+  if (identifier.includes('@')) {
+    try {
+      console.log('DEBUG: Attempting Supabase Auth login with email:', identifier);
+      
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: identifier,
+        password: password,
+      });
+
+      if (authError) {
+        console.log('DEBUG: Supabase Auth failed:', authError.message);
+        // Fallback para autenticação customizada
+      } else if (authData.user) {
+        console.log('DEBUG: Supabase Auth successful, fetching user data...');
+        
+        // Buscar dados do usuário na tabela customizada
+        const { data: userData, error: userError } = await supabase
+          .from('usuario')
+          .select(`
+            usuario_id,
+            nome,
+            email,
+            login,
+            tipo_usuario,
+            ativo,
+            clinica_id,
+            dentista_id
+          `)
+          .eq('email', identifier)
+          .eq('ativo', true)
+          .single();
+
+        if (!userError && userData) {
+          console.log('DEBUG: User data found via Supabase Auth');
+          return {
+            id: userData.usuario_id,
+            name: userData.nome,
+            email: userData.email,
+            role: userData.tipo_usuario as 'admin' | 'dentist' | 'clinic',
+            clinicId: userData.clinica_id,
+            dentistId: userData.dentista_id,
+            isActive: userData.ativo,
+          };
+        }
+      }
+    } catch (error) {
+      console.log('DEBUG: Supabase Auth error, falling back to custom auth:', error);
+    }
+  }
+
+  // Fallback para autenticação customizada
   try {
     // Buscar usuário apenas pelo campo login
     console.log('DEBUG: Searching user by login field:', identifier);

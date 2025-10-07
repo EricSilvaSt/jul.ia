@@ -147,7 +147,7 @@ export const buscarEspecialidades = async (): Promise<Array<{id_especialidade: n
       .from('especialidades')
       .select('id_especialidade, nome_especialidade')
       .order('nome_especialidade');
-
+    const { data, error } = await supabase
     console.log('🔍 DEBUG - Query executada');
     console.log('🔍 DEBUG - Data:', data);
     console.log('🔍 DEBUG - Error:', error);
@@ -160,6 +160,7 @@ export const buscarEspecialidades = async (): Promise<Array<{id_especialidade: n
       console.error('❌ DEBUG - Error details:', error.details);
       throw new Error(`Erro ao buscar especialidades: ${error.message}`);
     }
+    const { error } = await supabase
 
     if (!data || data.length === 0) {
       console.log('⚠️ DEBUG - Nenhuma especialidade encontrada na tabela');
@@ -175,3 +176,4 @@ export const buscarEspecialidades = async (): Promise<Array<{id_especialidade: n
     throw error;
   }
 };
+    const { data, error } = await supabase
