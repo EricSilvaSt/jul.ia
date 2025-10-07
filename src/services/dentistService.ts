@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase';
 
-// Cliente admin para operações que precisam contornar RLS
-const supabaseAdmin = supabase;
+// Importar cliente admin separadamente
+import { supabaseAdmin } from '../lib/supabase';
 
 export interface DentistaCompleto {
   dentista_id: string;
