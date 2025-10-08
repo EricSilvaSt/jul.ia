@@ -66,7 +66,6 @@ export const buscarDentistas = async (clinicaId: string): Promise<DentistaComple
       )
     `)
     .eq('clinica_id', clinicaId)
-    .eq('ativo', true)
     .order('nome');
 
   console.log('🦷 DEBUG - Resultado da query:', { data, error });
