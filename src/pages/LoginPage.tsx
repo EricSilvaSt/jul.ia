@@ -236,7 +236,7 @@ const LoginPage: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Indique a Júl.IA Agenda
+                Fale com a Júl.IA!
               </a>
             </div>
           </div>
