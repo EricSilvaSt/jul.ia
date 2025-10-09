@@ -209,9 +209,11 @@ const DentistsPage: React.FC = () => {
     try {
       await deletarDentista(dentistId);
       setDentists(dentists.filter(d => d.id !== dentistId));
+      alert('Dentista deletado com sucesso!');
     } catch (error) {
       console.error('Erro ao deletar dentista:', error);
-      alert('Erro ao deletar dentista. Tente novamente.');
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao deletar dentista';
+      alert(errorMessage);
     }
   };
 

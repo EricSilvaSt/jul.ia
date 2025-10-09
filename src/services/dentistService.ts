@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase';
 
 // Importar cliente admin separadamente
-import { supabaseAdmin } from '../lib/supabase';
+import { supabase, supabaseAdmin } from '../lib/supabase';
 
 export interface DentistaCompleto {
   dentista_id: string;
@@ -85,7 +85,9 @@ export const buscarDentistas = async (clinicaId: string): Promise<DentistaComple
 export const criarDentista = async (dentistaData: CreateDentistaData): Promise<DentistaCompleto> => {
   console.log('🦷 DEBUG - Criando dentista:', dentistaData);
   
-  const { data, error } = await supabaseAdmin
+  // Tentar usar admin client, fallback para client normal
+  const client = supabaseAdmin || supabase;
+  const { data, error } = await client
     .from('dentistas')
     .insert([dentistaData])
     .select('*')
@@ -110,7 +112,9 @@ export const atualizarDentista = async (
 ): Promise<void> => {
   console.log('🦷 DEBUG - Atualizando dentista:', dentistaId, updates);
   
-  const { error } = await supabaseAdmin
+  // Tentar usar admin client, fallback para client normal
+  const client = supabaseAdmin || supabase;
+  const { error } = await client
     .from('dentistas')
     .update(updates)
     .eq('dentista_id', dentistaId);
@@ -127,14 +131,24 @@ export const atualizarDentista = async (
 export const deletarDentista = async (dentistaId: string): Promise<void> => {
   console.log('🦷 DEBUG - Deletando dentista:', dentistaId);
   
-  const { error } = await supabaseAdmin
+  // Tentar usar admin client, fallback para client normal
+  const client = supabaseAdmin || supabase;
+  const { error } = await client
     .from('dentistas')
     .delete()
     .eq('dentista_id', dentistaId);
 
   if (error) {
     console.error('❌ DEBUG - Erro ao deletar:', error);
-    throw new Error(`Erro ao deletar dentista: ${error.message}`);
+    
+    // Mensagem mais específica baseada no tipo de erro
+    if (error.code === 'PGRST301') {
+      throw new Error('Você não tem permissão para deletar este dentista. Verifique suas credenciais.');
+    } else if (error.code === '23503') {
+      throw new Error('Não é possível deletar este dentista pois ele possui agendamentos vinculados.');
+    } else {
+      throw new Error(`Erro ao deletar dentista: ${error.message}`);
+    }
   }
 };
 
