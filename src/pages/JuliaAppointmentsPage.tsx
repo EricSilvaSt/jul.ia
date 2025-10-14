@@ -103,6 +103,34 @@ const JuliaAppointmentsPage: React.FC = () => {
     statusFilter === 'all' || appointment.status === statusFilter
   );
 
+  // Separar e organizar agendamentos por data
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  
+  const upcomingAppointments = filteredAppointments
+    .filter(appointment => {
+      const appointmentDate = new Date(appointment.data_solicitada + 'T00:00:00');
+      return appointmentDate >= today;
+    })
+    .sort((a, b) => {
+      // Ordenar por data e depois por horário (mais próximos primeiro)
+      const dateA = new Date(a.data_solicitada + 'T' + a.horario_solicitado);
+      const dateB = new Date(b.data_solicitada + 'T' + b.horario_solicitado);
+      return dateA.getTime() - dateB.getTime();
+    });
+
+  const pastAppointments = filteredAppointments
+    .filter(appointment => {
+      const appointmentDate = new Date(appointment.data_solicitada + 'T00:00:00');
+      return appointmentDate < today;
+    })
+    .sort((a, b) => {
+      // Ordenar por data e depois por horário (mais recentes primeiro)
+      const dateA = new Date(a.data_solicitada + 'T' + a.horario_solicitado);
+      const dateB = new Date(b.data_solicitada + 'T' + b.horario_solicitado);
+      return dateB.getTime() - dateA.getTime();
+    });
+
   const getStatusColor = (status: JuliaAppointment['status']) => {
     switch (status) {
       case 'agendado':
@@ -304,131 +332,284 @@ const JuliaAppointmentsPage: React.FC = () => {
       </div>
 
       {/* Lista de Agendamentos */}
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        {filteredAppointments.length === 0 ? (
+      <div className="space-y-6">
+        {/* Agendamentos Futuros */}
+        {upcomingAppointments.length > 0 && (
+          <div className="bg-white shadow-md rounded-lg overflow-hidden">
+            <div className="bg-green-50 px-6 py-3 border-b border-green-200">
+              <h3 className="text-lg font-semibold text-green-800 flex items-center">
+                <Calendar size={20} className="mr-2" />
+                Próximos Agendamentos ({upcomingAppointments.length})
+              </h3>
+              <p className="text-sm text-green-600">Agendamentos futuros ordenados por proximidade</p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Paciente
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Data/Hora Solicitada
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Procedimento
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Origem
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Recebido
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Ações
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {upcomingAppointments.map((appointment) => {
+                    const appointmentDateTime = new Date(appointment.data_solicitada + 'T' + appointment.horario_solicitado);
+                    const isToday = appointmentDateTime.toDateString() === now.toDateString();
+                    const isTomorrow = appointmentDateTime.toDateString() === new Date(now.getTime() + 24 * 60 * 60 * 1000).toDateString();
+                    
+                    return (
+                      <tr key={appointment.id} className={`hover:bg-gray-50 ${isToday ? 'bg-blue-50' : isTomorrow ? 'bg-yellow-50' : ''}`}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="bg-blue-100 p-2 rounded-full mr-3">
+                              <User size={16} className="text-blue-600" />
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {appointment.nome_paciente}
+                              </div>
+                              <div className="text-sm text-gray-500 flex items-center">
+                                <Phone size={12} className="mr-1" />
+                                {appointment.telefone_paciente}
+                              </div>
+                              {appointment.email_paciente && (
+                                <div className="text-sm text-gray-500 flex items-center">
+                                  <Mail size={12} className="mr-1" />
+                                  {appointment.email_paciente}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900 flex items-center">
+                            <Calendar size={14} className="mr-1" />
+                            {new Date(appointment.data_solicitada + 'T00:00:00').toLocaleDateString('pt-BR')}
+                            {isToday && <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Hoje</span>}
+                            {isTomorrow && <span className="ml-2 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Amanhã</span>}
+                          </div>
+                          <div className="text-sm text-gray-500 flex items-center">
+                            <Clock size={14} className="mr-1" />
+                            {appointment.horario_solicitado}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{appointment.procedimento}</div>
+                          {appointment.observacoes && (
+                            <div className="text-sm text-gray-500 truncate max-w-xs">
+                              {appointment.observacoes}
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <span className="text-lg mr-2">{getSourceIcon(appointment.origem)}</span>
+                            <span className="text-sm text-gray-900 capitalize">{appointment.origem}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <select
+                            value={appointment.status}
+                            onChange={(e) => handleStatusChange(appointment.id, e.target.value as JuliaAgendamento['status'])}
+                            className={`px-2 py-1 text-xs font-semibold rounded-full border-0 focus:ring-2 focus:ring-blue-500 ${getStatusColor(appointment.status)}`}
+                          >
+                            <option value="agendado">Agendado</option>
+                            <option value="confirmado">Confirmado</option>
+                            <option value="cancelado">Cancelado</option>
+                            <option value="realizado">Realizado</option>
+                            <option value="ausente">Ausente</option>
+                          </select>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(appointment.criado_em).toLocaleString('pt-BR')}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <div className="flex space-x-2">
+                            {appointment.status === 'agendado' && (
+                              <>
+                                <button 
+                                  onClick={() => handleStatusChange(appointment.id, 'confirmado')}
+                                  className="text-green-600 hover:text-green-800 transition-colors duration-200"
+                                  title="Confirmar agendamento"
+                                >
+                                  <CheckCircle size={16} />
+                                </button>
+                                <button 
+                                  onClick={() => handleStatusChange(appointment.id, 'cancelado')}
+                                  className="text-red-600 hover:text-red-800 transition-colors duration-200"
+                                  title="Cancelar agendamento"
+                                >
+                                  <XCircle size={16} />
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Agendamentos Passados */}
+        {pastAppointments.length > 0 && (
+          <div className="bg-white shadow-md rounded-lg overflow-hidden">
+            <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-700 flex items-center">
+                <Clock size={20} className="mr-2" />
+                Agendamentos Anteriores ({pastAppointments.length})
+              </h3>
+              <p className="text-sm text-gray-500">Agendamentos que já passaram da data</p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Paciente
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Data/Hora Solicitada
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Procedimento
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Origem
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Recebido
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Ações
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {pastAppointments.map((appointment) => (
+                    <tr key={appointment.id} className="hover:bg-gray-50 opacity-75">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="bg-gray-100 p-2 rounded-full mr-3">
+                            <User size={16} className="text-gray-500" />
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium text-gray-700">
+                              {appointment.nome_paciente}
+                            </div>
+                            <div className="text-sm text-gray-400 flex items-center">
+                              <Phone size={12} className="mr-1" />
+                              {appointment.telefone_paciente}
+                            </div>
+                            {appointment.email_paciente && (
+                              <div className="text-sm text-gray-400 flex items-center">
+                                <Mail size={12} className="mr-1" />
+                                {appointment.email_paciente}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-700 flex items-center">
+                          <Calendar size={14} className="mr-1" />
+                          {new Date(appointment.data_solicitada + 'T00:00:00').toLocaleDateString('pt-BR')}
+                        </div>
+                        <div className="text-sm text-gray-400 flex items-center">
+                          <Clock size={14} className="mr-1" />
+                          {appointment.horario_solicitado}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-700">{appointment.procedimento}</div>
+                        {appointment.observacoes && (
+                          <div className="text-sm text-gray-400 truncate max-w-xs">
+                            {appointment.observacoes}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <span className="text-lg mr-2 opacity-60">{getSourceIcon(appointment.origem)}</span>
+                          <span className="text-sm text-gray-700 capitalize">{appointment.origem}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <select
+                          value={appointment.status}
+                          onChange={(e) => handleStatusChange(appointment.id, e.target.value as JuliaAgendamento['status'])}
+                          className={`px-2 py-1 text-xs font-semibold rounded-full border-0 focus:ring-2 focus:ring-blue-500 ${getStatusColor(appointment.status)}`}
+                        >
+                          <option value="agendado">Agendado</option>
+                          <option value="confirmado">Confirmado</option>
+                          <option value="cancelado">Cancelado</option>
+                          <option value="realizado">Realizado</option>
+                          <option value="ausente">Ausente</option>
+                        </select>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                        {new Date(appointment.criado_em).toLocaleString('pt-BR')}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <div className="flex space-x-2">
+                          {appointment.status === 'agendado' && (
+                            <>
+                              <button 
+                                onClick={() => handleStatusChange(appointment.id, 'confirmado')}
+                                className="text-green-600 hover:text-green-800 transition-colors duration-200"
+                                title="Confirmar agendamento"
+                              >
+                                <CheckCircle size={16} />
+                              </button>
+                              <button 
+                                onClick={() => handleStatusChange(appointment.id, 'cancelado')}
+                                className="text-red-600 hover:text-red-800 transition-colors duration-200"
+                                title="Cancelar agendamento"
+                              >
+                                <XCircle size={16} />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Mensagem quando não há agendamentos */}
+        {filteredAppointments.length === 0 && (
           <div className="text-center py-8">
             <Bot size={48} className="mx-auto text-gray-400 mb-2" />
             <p className="text-gray-500">Nenhum agendamento encontrado com os filtros aplicados.</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Paciente
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Data/Hora Solicitada
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Procedimento
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Origem
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Recebido
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ações
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredAppointments.map((appointment) => (
-                  <tr key={appointment.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="bg-blue-100 p-2 rounded-full mr-3">
-                          <User size={16} className="text-blue-600" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {appointment.nome_paciente}
-                          </div>
-                          <div className="text-sm text-gray-500 flex items-center">
-                            <Phone size={12} className="mr-1" />
-                            {appointment.telefone_paciente}
-                          </div>
-                          {appointment.email_paciente && (
-                            <div className="text-sm text-gray-500 flex items-center">
-                              <Mail size={12} className="mr-1" />
-                              {appointment.email_paciente}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 flex items-center">
-                        <Calendar size={14} className="mr-1" />
-                        {new Date(appointment.data_solicitada + 'T00:00:00').toLocaleDateString('pt-BR')}
-                      </div>
-                      <div className="text-sm text-gray-500 flex items-center">
-                        <Clock size={14} className="mr-1" />
-                        {appointment.horario_solicitado}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{appointment.procedimento}</div>
-                      {appointment.observacoes && (
-                        <div className="text-sm text-gray-500 truncate max-w-xs">
-                          {appointment.observacoes}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <span className="text-lg mr-2">{getSourceIcon(appointment.origem)}</span>
-                        <span className="text-sm text-gray-900 capitalize">{appointment.origem}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <select
-                        value={appointment.status}
-                        onChange={(e) => handleStatusChange(appointment.id, e.target.value as JuliaAgendamento['status'])}
-                        className={`px-2 py-1 text-xs font-semibold rounded-full border-0 focus:ring-2 focus:ring-blue-500 ${getStatusColor(appointment.status)}`}
-                      >
-                        <option value="agendado">Agendado</option>
-                        <option value="confirmado">Confirmado</option>
-                        <option value="cancelado">Cancelado</option>
-                        <option value="realizado">Realizado</option>
-                        <option value="ausente">Ausente</option>
-                      </select>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(appointment.criado_em).toLocaleString('pt-BR')}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <div className="flex space-x-2">
-                        {appointment.status === 'agendado' && (
-                          <>
-                            <button 
-                              onClick={() => handleStatusChange(appointment.id, 'confirmado')}
-                              className="text-green-600 hover:text-green-800 transition-colors duration-200"
-                              title="Confirmar agendamento"
-                            >
-                              <CheckCircle size={16} />
-                            </button>
-                            <button 
-                              onClick={() => handleStatusChange(appointment.id, 'cancelado')}
-                              className="text-red-600 hover:text-red-800 transition-colors duration-200"
-                              title="Cancelar agendamento"
-                            >
-                              <XCircle size={16} />
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         )}
       </div>
