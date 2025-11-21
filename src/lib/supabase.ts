@@ -36,3 +36,4 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 // Cliente com service role para operações administrativas (como login)
 export const supabaseAdmin = supabaseServiceKey 
   ? createClient(supabaseUrl, supabaseServiceKey)
+  : null;
