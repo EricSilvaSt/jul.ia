@@ -5,9 +5,42 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Júl.IA Agenda - Sistema de Agendamento Odontológico</title>
+    <style>
+      /* Fallback para debug */
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+      }
+      .debug-loading {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #f0f0f0;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+      }
+    </style>
   </head>
   <body>
+    <div id="loading" class="debug-loading">
+      <h2>🔄 Carregando Júl.IA Agenda...</h2>
+      <p>Se esta mensagem não desaparecer, verifique o console (F12)</p>
+    </div>
     <div id="root"></div>
+    <script>
+      // Debug básico
+      console.log('📄 INDEX.HTML - HTML carregado');
+      
+      // Remover loading quando React carregar
+      setTimeout(() => {
+        const loading = document.getElementById('loading');
+        if (loading && document.getElementById('root').children.length === 0) {
+          loading.innerHTML = '<h2 style="color: red;">❌ React não carregou!</h2><p>Verifique o console (F12) para erros</p>';
+        }
+      }, 5000);
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -6,6 +6,8 @@ import { useAuth } from '../hooks/useAuth';
 import logo from '../assets/logo';
 
 const LoginPage: React.FC = () => {
+  console.log('🔑 LOGIN - LoginPage component rendering...');
+  
   const [loginIdentifier, setLoginIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -14,6 +16,8 @@ const LoginPage: React.FC = () => {
   const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log('🔑 LOGIN - Form submitted');
+    
     e.preventDefault();
     setError('');
     setIsLoading(true);
