@@ -16,6 +16,8 @@ const PrivateRoute = ({ children }: { children: JSX.Element }) => {
 };
 
 function App() {
+  console.log('🎯 App component rendering...');
+  
   return (
     <Router>
       <Routes>
