@@ -50,6 +50,25 @@ export interface ClinicInfo {
 export const authenticateUser = async (credentials: LoginCredentials): Promise<AuthUser> => {
   const { identifier, password } = credentials;
 
+  // Verificar se o Supabase está configurado
+  if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+    console.warn('⚠️ Supabase não configurado, usando modo demo');
+    
+    // Modo demo - permitir login com credenciais específicas
+    if (identifier === 'demo@clinica.com' && password === 'demo123') {
+      return {
+        id: 'demo-user-id',
+        name: 'Usuário Demo',
+        email: 'demo@clinica.com',
+        role: 'admin',
+        clinicId: 'demo-clinic-id',
+        isActive: true,
+      };
+    } else {
+      throw new Error('Modo demo: Use demo@clinica.com / demo123');
+    }
+  }
+
   console.log('Attempting authentication for identifier:', identifier);
 
   // Primeiro, tentar autenticação com Supabase Auth se o identifier for um email
@@ -178,6 +197,12 @@ export const authenticateUser = async (credentials: LoginCredentials): Promise<A
  */
 export const getClinicInfo = async (clinicId: string): Promise<ClinicInfo> => {
   console.log('DEBUG: getClinicInfo called with clinicId:', clinicId);
+  
+  // Se for modo demo, retornar dados de teste
+  if (clinicId === 'demo-clinic-id' || !import.meta.env.VITE_SUPABASE_URL) {
+    console.log('DEBUG: Returning demo clinic data');
+    return createTestClinicData(clinicId);
+  }
   
   try {
     console.log('DEBUG: Executing clinic query...');
