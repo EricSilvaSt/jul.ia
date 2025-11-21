@@ -7,11 +7,4 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
-  build: {
-    rollupOptions: {
-      input: {
-        main: 'index.html'
-      }
-    }
-  }
 });
