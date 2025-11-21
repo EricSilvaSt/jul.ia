@@ -28,44 +28,17 @@ function App() {
     
     return (
       <Router>
-        <div>
-          {/* Debug info mais visível */}
-          <div style={{ 
-            position: 'fixed', 
-            top: 0, 
-            right: 0, 
-            background: 'rgba(255,0,0,0.9)', 
-            color: 'white', 
-            padding: '10px', 
-            fontSize: '12px',
-            zIndex: 9999,
-            maxWidth: '300px',
-            wordBreak: 'break-all'
-          }}>
-            <div><strong>DEBUG NETLIFY:</strong></div>
-            <div>Path: {window.location.pathname}</div>
-            <div>Hash: {window.location.hash}</div>
-            <div>Auth: {localStorage.getItem('isAuthenticated') || 'null'}</div>
-            <div>Env: {import.meta.env.MODE}</div>
-          </div>
-          
-          <Routes>
+        <Routes>
             <Route path="/login" element={
-              <div>
-                {console.log('🔑 APP.TSX - Rendering LoginPage')}
-                <LoginPage />
-              </div>
+              <LoginPage />
             } />
             
             <Route
               path="/"
               element={
-                <div>
-                  {console.log('🏠 APP.TSX - Rendering MainLayout with PrivateRoute')}
-                  <PrivateRoute>
-                    <MainLayout />
-                  </PrivateRoute>
-                </div>
+                <PrivateRoute>
+                  <MainLayout />
+                </PrivateRoute>
               }
             >
               <Route index element={<Navigate to="/dashboard" replace />} />
@@ -78,7 +51,6 @@ function App() {
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
           </Routes>
-        </div>
       </Router>
     );
   } catch (error) {

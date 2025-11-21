@@ -70,17 +70,15 @@ const LoginPage: React.FC = () => {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
           {/* Credenciais de Teste */}
-          {/* <div className="mb-4 bg-blue-50 border-l-4 border-blue-500 p-4">
+          <div className="mb-4 bg-blue-50 border-l-4 border-blue-500 p-4">
             <div className="flex">
               <div className="ml-3">
                 <p className="text-sm text-blue-700 font-medium">Credenciais de Teste</p>
-                <p className="text-sm text-blue-600 mt-1">Clínica: admin@dental.com / 123456</p>
-                <p className="text-sm text-blue-600">Usuário Admin: admin@clinica.com</p>
-                <p className="text-sm text-blue-600">Dentista: CRO-SP12345</p>
-                <p className="text-sm text-blue-600">Senha: 123456</p>
+                <p className="text-sm text-blue-600 mt-1">Email: demo@clinica.com</p>
+                <p className="text-sm text-blue-600">Senha: demo123</p>
               </div>
             </div>
-          </div> */}
+          </div>
 
           {error && (
             <div className="mb-4 bg-red-50 border-l-4 border-red-500 p-4">
