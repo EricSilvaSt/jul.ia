@@ -21,7 +21,7 @@ const CalendarConnector: React.FC<CalendarConnectorProps> = ({
       <div className="p-4 bg-blue-600 text-white">
         <h2 className="text-lg font-semibold">Integrações de Calendário</h2>
         <p className="text-sm text-blue-100">
-          Conecte seus calendários para sincronizar consultas
+          Conecte seus calendários para sincronizar seeus compromissos
         </p>
       </div>
 
@@ -35,7 +35,7 @@ const CalendarConnector: React.FC<CalendarConnectorProps> = ({
             <div>
               <h3 className="font-medium">Google Calendar</h3>
               <p className="text-sm text-gray-500">
-                Sincronize consultas com seu Google Calendar
+                Sincronize os compromissos com seu Google Calendar
               </p>
             </div>
           </div>
@@ -72,7 +72,7 @@ const CalendarConnector: React.FC<CalendarConnectorProps> = ({
             <div>
               <h3 className="font-medium">Microsoft Outlook</h3>
               <p className="text-sm text-gray-500">
-                Sincronize consultas com seu Outlook Calendar
+                Sincronize os compromissos com seu Outlook Calendar
               </p>
             </div>
           </div>
