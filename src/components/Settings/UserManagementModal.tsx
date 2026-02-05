@@ -44,7 +44,7 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({
       if (!currentUser?.clinicId || currentUser.clinicId === 'test-clinic-id') return;
       
       try {
-        const dentistas = await buscarDentistas(currentUser.clinicId);
+        const dentistas = await buscarProfissionais(currentUser.clinicId);
         setAvailableDentists(dentistas);
       } catch (error) {
         console.error('Erro ao carregar dentistas:', error);

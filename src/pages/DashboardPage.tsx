@@ -31,7 +31,7 @@ const DashboardPage: React.FC = () => {
         
         // Carregar dentistas (apenas se tiver permissão)
         if (permissions.canViewAllDentists) {
-          const dentistData = await buscarDentistas(user.clinicId);
+          const dentistData = await buscarProfissionais(user.clinicId);
           setDentists(dentistData.map(d => ({
             id: d.dentista_id,
             name: d.nome,
