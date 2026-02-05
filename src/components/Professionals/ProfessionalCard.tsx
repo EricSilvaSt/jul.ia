@@ -3,37 +3,37 @@ import { User, Clock, Phone, Mail, CreditCard as Edit, Trash2, UserX, UserCheck,
 import { Dentist } from '../../types';
 
 interface ProfessionalCardProps {
-  dentist: Dentist;
-  onEdit: (dentist: Dentist) => void;
-  onToggleActive: (dentistId: string) => void;
-  onDelete: (dentistId: string) => void;
+  professional: Professional;
+  onEdit: (professional: Professional) => void;
+  onToggleActive: (professionalId: string) => void;
+  onDelete: (professionalId: string) => void;
 }
 
 const ProfessionalCard: React.FC<ProfessionalCardProps> = ({ 
-  dentist, 
+  professional, 
   onEdit, 
   onToggleActive, 
   onDelete 
 }) => {
   return (
     <div className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg ${
-      !dentist.isActive ? 'opacity-75 border-l-4 border-red-400' : 'border-l-4 border-green-400'
+      !professional.isActive ? 'opacity-75 border-l-4 border-red-400' : 'border-l-4 border-green-400'
     }`}>
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <div className={`rounded-full p-3 mr-4 ${
-              dentist.isActive ? 'bg-blue-100' : 'bg-gray-100'
+              professional.isActive ? 'bg-blue-100' : 'bg-gray-100'
             }`}>
-              <User size={24} className={dentist.isActive ? 'text-blue-600' : 'text-gray-400'} />
+              <User size={24} className={professional.isActive ? 'text-blue-600' : 'text-gray-400'} />
             </div>
             <div>
-              <h3 className="font-semibold text-lg">Prof. {dentist.name}</h3>
-              <p className="text-sm text-gray-600">{dentist.specialization}</p>
+              <h3 className="font-semibold text-lg">Prof. {professional.name}</h3>
+              <p className="text-sm text-gray-600">{professional.areaAtuacao}</p>
             </div>
           </div>
           <div className="flex items-center space-x-1">
-            {dentist.isActive ? (
+            {professional.isActive ? (
               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                 <UserCheck size={12} className="mr-1" />
                 Ativo
@@ -51,17 +51,17 @@ const ProfessionalCard: React.FC<ProfessionalCardProps> = ({
       <div className="p-4 space-y-3">
         <div className="flex items-center text-sm">
           <Mail size={16} className="text-gray-500 mr-2" />
-          <span>{dentist.email}</span>
+          <span>{professional.email}</span>
         </div>
         
         <div className="flex items-center text-sm">
           <Phone size={16} className="text-gray-500 mr-2" />
-          <span>{dentist.phoneNumber}</span>
+          <span>{professional.phoneNumber}</span>
         </div>
 
         <div className="flex items-center text-sm">
           <Badge size={16} className="text-gray-500 mr-2" />
-          <span>{dentist.cro}</span>
+          <span>{professional.identificador}</span>
         </div>
         
         <div className="text-sm">
@@ -70,8 +70,8 @@ const ProfessionalCard: React.FC<ProfessionalCardProps> = ({
             Disponibilidade:
           </span>
           <div className="text-xs space-y-1">
-            {Object.keys(dentist.availability).length > 0 ? (
-              Object.entries(dentist.availability).map(([day, schedule]) => (
+            {Object.keys(professional.availability).length > 0 ? (
+              Object.entries(professional.availability).map(([day, schedule]) => (
                 <div key={day} className="flex justify-between">
                   <span className="capitalize">{day}:</span>
                   <span>{schedule.inicio} - {schedule.fim}</span>
