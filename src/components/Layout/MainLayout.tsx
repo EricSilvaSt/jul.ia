@@ -28,11 +28,11 @@ const MainLayout: React.FC = () => {
   const menuItems = [
     { name: 'Painel', icon: <Calendar size={20} />, path: '/dashboard' },
     { name: 'Lia', icon: <MessageCircle size={20} />, path: '/lia' },
-    { name: 'Agendamentos', icon: <CalendarCheck size={20} />, path: '/appointments' },
+    { name: 'Compromissos', icon: <CalendarCheck size={20} />, path: '/commitments' },
     { 
-      name: 'Dentistas', 
+      name: 'Profissionais', 
       icon: <Users size={20} />, 
-      path: '/dentists',
+      path: '/professionals',
       requiresPermission: 'canViewAllDentists'
     },
     { 

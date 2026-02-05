@@ -13,14 +13,14 @@ export interface User {
 
 export interface Appointment {
   id: string;
-  patientName: string;
-  patientEmail: string;
-  patientPhone: string;
-  dentistId: string;
+  clientName: string;
+  clientEmail: string;
+  clientPhone: string;
+  professionalId: string;
   data_agendamento: string; // UTC ISO string
   fim_agendamento: string; // UTC ISO string
   status: 'pendente' | 'confirmado' | 'concluido' | 'cancelado' | 'falta';
-  procedure: string;
+  service: string;
   notes?: string;
   duracao_minutos: number;
   origem: 'app' | 'julia';
