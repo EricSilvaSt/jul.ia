@@ -120,15 +120,15 @@ const DashboardPage: React.FC = () => {
         </h1>
         <p className="text-gray-600">
           {permissions.canViewAllAppointments
-            ? 'Visão geral de toda a clínica odontológica' 
-            : 'Suas consultas e agenda pessoal'
+            ? 'Visão geral' 
+            : 'Seus compromissos e agenda pessoal'
           }
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Consultas Hoje"
+          title="Compromissos Hoje"
           value={todaysAppointments.length}
           icon={<Calendar size={24} />}
           change={{ value: 5, type: 'increase' }}
@@ -137,7 +137,7 @@ const DashboardPage: React.FC = () => {
         />
         {permissions.canViewAllDentists && (
           <StatCard
-          title="Total de Dentistas"
+          title="Total de Profissionais"
             value={dentists.filter(d => d.isActive).length}
           icon={<User size={24} />}
           bgColor="bg-green-100"
@@ -145,7 +145,7 @@ const DashboardPage: React.FC = () => {
         />
         )}
         <StatCard
-          title="Consultas Confirmadas"
+          title="Compromissos Confirmadas"
           value={confirmedAppointments.length}
           icon={<CalendarCheck size={24} />}
           change={{ value: 8, type: 'increase' }}
@@ -153,7 +153,7 @@ const DashboardPage: React.FC = () => {
           iconColor="text-teal-600"
         />
         <StatCard
-          title="Consultas Canceladas"
+          title="Compromissos Cancelados"
           value={cancelledAppointments.length}
           icon={<CalendarX size={24} />}
           change={{ value: 2, type: 'decrease' }}
@@ -165,7 +165,7 @@ const DashboardPage: React.FC = () => {
       <div className="bg-white p-6 rounded-lg shadow-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-800">
-            Próximas Consultas
+            Próximos Compromissos
           </h2>
           <div className="flex space-x-2">
             <button 
@@ -173,7 +173,7 @@ const DashboardPage: React.FC = () => {
               className="flex items-center text-blue-600 hover:text-blue-800"
             >
               <PlusCircle size={20} className="mr-1" />
-              Nova Consulta
+              Novo Compromisso
             </button>
             <Link 
               to="/appointments"
@@ -189,16 +189,16 @@ const DashboardPage: React.FC = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Paciente
+                  Cliente
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Data e Horário
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Dentista
+                  Profissional
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Procedimento
+                  Assunto
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
@@ -287,7 +287,7 @@ const DashboardPage: React.FC = () => {
         <div className="bg-white p-6 rounded-lg shadow-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-800">
-              Dentistas da Clínica
+              Profissionais
           </h2>
           <button className="flex items-center text-blue-600 hover:text-blue-800">
             <Users size={20} className="mr-1" />
