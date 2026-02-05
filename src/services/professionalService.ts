@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 // Importar cliente admin separadamente
 import { supabase, supabaseAdmin } from '../lib/supabase';
 
-export interface DentistaCompleto {
+export interface ProfessionalComplete {
   dentista_id: string;
   clinica_id: string;
   nome: string;
@@ -27,7 +27,7 @@ export interface DentistaCompleto {
   };
 }
 
-export interface CreateDentistaData {
+export interface CreateProfessionalData {
   nome: string;
   especialidade: number;
   cro: string;
@@ -40,10 +40,10 @@ export interface CreateDentistaData {
 }
 
 /**
- * Busca dentistas da clínica - VERSÃO SIMPLIFICADA
+ * Busca profissionais da organização - VERSÃO SIMPLIFICADA
  */
-export const buscarDentistas = async (clinicaId: string): Promise<DentistaCompleto[]> => {
-  console.log('🦷 DEBUG - buscarDentistas iniciado');
+export const buscarProfissionais = async (clinicaId: string): Promise<ProfessionalComplete[]> => {
+  console.log('🦷 DEBUG - buscarProfissionais iniciado');
   console.log('  - clinicaId:', clinicaId);
   console.log('  - clinicaId type:', typeof clinicaId);
   
@@ -69,27 +69,27 @@ export const buscarDentistas = async (clinicaId: string): Promise<DentistaComple
     .order('nome');
 
   console.log('🦷 DEBUG - Resultado da query:', { data, error });
-  console.log('🦷 DEBUG - Dados encontrados:', data?.length || 0, 'dentistas');
+  console.log('🦷 DEBUG - Dados encontrados:', data?.length || 0, 'profissionais');
 
   if (error) {
     console.error('❌ DEBUG - Erro:', error);
-    throw new Error(`Erro ao buscar dentistas: ${error.message}`);
+    throw new Error(`Erro ao buscar profissionais: ${error.message}`);
   }
 
   return data || [];
 };
 
 /**
- * Cria novo dentista
+ * Cria novo profissional
  */
-export const criarDentista = async (dentistaData: CreateDentistaData): Promise<DentistaCompleto> => {
-  console.log('🦷 DEBUG - Criando dentista:', dentistaData);
+export const criarProfissional = async (professionalData: CreateProfessionalData): Promise<ProfessionalComplete> => {
+  console.log('🦷 DEBUG - Criando profissional:', professionalData);
   
   // Tentar usar admin client, fallback para client normal
   const client = supabaseAdmin || supabase;
   const { data, error } = await client
     .from('dentistas')
-    .insert([dentistaData])
+    .insert([professionalData])
     .select('*')
     .single();
 
@@ -97,66 +97,66 @@ export const criarDentista = async (dentistaData: CreateDentistaData): Promise<D
 
   if (error) {
     console.error('❌ DEBUG - Erro ao criar:', error);
-    throw new Error(`Erro ao criar dentista: ${error.message}`);
+    throw new Error(`Erro ao criar profissional: ${error.message}`);
   }
 
   return data;
 };
 
 /**
- * Atualiza dentista existente
+ * Atualiza profissional existente
  */
-export const atualizarDentista = async (
-  dentistaId: string, 
-  updates: Partial<CreateDentistaData>
+export const atualizarProfissional = async (
+  professionalId: string, 
+  updates: Partial<CreateProfessionalData>
 ): Promise<void> => {
-  console.log('🦷 DEBUG - Atualizando dentista:', dentistaId, updates);
+  console.log('🦷 DEBUG - Atualizando profissional:', professionalId, updates);
   
   // Tentar usar admin client, fallback para client normal
   const client = supabaseAdmin || supabase;
   const { error } = await client
     .from('dentistas')
     .update(updates)
-    .eq('dentista_id', dentistaId);
+    .eq('dentista_id', professionalId);
 
   if (error) {
     console.error('❌ DEBUG - Erro ao atualizar:', error);
-    throw new Error(`Erro ao atualizar dentista: ${error.message}`);
+    throw new Error(`Erro ao atualizar profissional: ${error.message}`);
   }
 };
 
 /**
- * Deleta dentista
+ * Deleta profissional
  */
-export const deletarDentista = async (dentistaId: string): Promise<void> => {
-  console.log('🦷 DEBUG - Deletando dentista:', dentistaId);
+export const deletarProfissional = async (professionalId: string): Promise<void> => {
+  console.log('🦷 DEBUG - Deletando profissional:', professionalId);
   
   // Tentar usar admin client, fallback para client normal
   const client = supabaseAdmin || supabase;
   const { error } = await client
     .from('dentistas')
     .delete()
-    .eq('dentista_id', dentistaId);
+    .eq('dentista_id', professionalId);
 
   if (error) {
     console.error('❌ DEBUG - Erro ao deletar:', error);
     
     // Mensagem mais específica baseada no tipo de erro
     if (error.code === 'PGRST301') {
-      throw new Error('Você não tem permissão para deletar este dentista. Verifique suas credenciais.');
+      throw new Error('Você não tem permissão para deletar este profissional. Verifique suas credenciais.');
     } else if (error.code === '23503') {
-      throw new Error('Não é possível deletar este dentista pois ele possui agendamentos vinculados.');
+      throw new Error('Não é possível deletar este profissional pois ele possui agendamentos vinculados.');
     } else {
-      throw new Error(`Erro ao deletar dentista: ${error.message}`);
+      throw new Error(`Erro ao deletar profissional: ${error.message}`);
     }
   }
 };
 
 /**
- * Busca especialidades disponíveis
+ * Busca áreas de atuação disponíveis
  */
-export const buscarEspecialidades = async (): Promise<Array<{id_especialidade: number, nome_especialidade: string}>> => {
-  console.log('🔍 DEBUG - buscarEspecialidades INICIADO');
+export const buscarAreasAtuacao = async (): Promise<Array<{id_especialidade: number, nome_especialidade: string}>> => {
+  console.log('🔍 DEBUG - buscarAreasAtuacao INICIADO');
   console.log('🔍 DEBUG - Supabase client:', supabase);
   
   try {
@@ -176,20 +176,20 @@ export const buscarEspecialidades = async (): Promise<Array<{id_especialidade: n
       console.error('❌ DEBUG - Error code:', error.code);
       console.error('❌ DEBUG - Error message:', error.message);
       console.error('❌ DEBUG - Error details:', error.details);
-      throw new Error(`Erro ao buscar especialidades: ${error.message}`);
+      throw new Error(`Erro ao buscar áreas de atuação: ${error.message}`);
     }
 
     if (!data || data.length === 0) {
-      console.log('⚠️ DEBUG - Nenhuma especialidade encontrada na tabela');
+      console.log('⚠️ DEBUG - Nenhuma área de atuação encontrada na tabela');
       return [];
     }
 
-    console.log('✅ DEBUG - Especialidades encontradas:', data.length);
-    console.log('✅ DEBUG - Primeira especialidade:', data[0]);
+    console.log('✅ DEBUG - Áreas de atuação encontradas:', data.length);
+    console.log('✅ DEBUG - Primeira área de atuação:', data[0]);
     return data;
     
   } catch (error) {
-    console.error('❌ DEBUG - Exception em buscarEspecialidades:', error);
+    console.error('❌ DEBUG - Exception em buscarAreasAtuacao:', error);
     throw error;
   }
 };

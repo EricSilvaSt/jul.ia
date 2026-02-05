@@ -2,14 +2,14 @@ import React from 'react';
 import { User, Clock, Phone, Mail, CreditCard as Edit, Trash2, UserX, UserCheck, Badge } from 'lucide-react';
 import { Dentist } from '../../types';
 
-interface DentistCardProps {
+interface ProfessionalCardProps {
   dentist: Dentist;
   onEdit: (dentist: Dentist) => void;
   onToggleActive: (dentistId: string) => void;
   onDelete: (dentistId: string) => void;
 }
 
-const DentistCard: React.FC<DentistCardProps> = ({ 
+const ProfessionalCard: React.FC<ProfessionalCardProps> = ({ 
   dentist, 
   onEdit, 
   onToggleActive, 
@@ -28,7 +28,7 @@ const DentistCard: React.FC<DentistCardProps> = ({
               <User size={24} className={dentist.isActive ? 'text-blue-600' : 'text-gray-400'} />
             </div>
             <div>
-              <h3 className="font-semibold text-lg">Dr. {dentist.name}</h3>
+              <h3 className="font-semibold text-lg">Prof. {dentist.name}</h3>
               <p className="text-sm text-gray-600">{dentist.specialization}</p>
             </div>
           </div>
@@ -67,7 +67,7 @@ const DentistCard: React.FC<DentistCardProps> = ({
         <div className="text-sm">
           <span className="text-gray-500 flex items-center mb-1">
             <Clock size={16} className="mr-1" />
-            Horários:
+            Disponibilidade:
           </span>
           <div className="text-xs space-y-1">
             {Object.keys(dentist.availability).length > 0 ? (
@@ -126,4 +126,4 @@ const DentistCard: React.FC<DentistCardProps> = ({
   );
 };
 
-export default DentistCard;
+export default ProfessionalCard;

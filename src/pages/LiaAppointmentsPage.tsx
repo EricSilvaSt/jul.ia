@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Bot, Calendar, Clock, User, Phone, Mail, CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
-import { buscarAgendamentosJulia, atualizarStatusJulia, transferirParaAgenda } from '../services/juliaAppointmentService';
+import { buscarAgendamentosLia, atualizarStatusLia, transferirParaAgendaLia } from '../services/liaAppointmentService';
 import { formatDateTimeBR } from '../utils/timezone';
 import { useAuth } from '../hooks/useAuth';
 
-import { JuliaAgendamento } from '../services/juliaAppointmentService';
+import { LiaAppointment } from '../services/liaAppointmentService';
 
-
-const JuliaAppointmentsPage: React.FC = () => {
-  const [appointments, setAppointments] = useState<JuliaAgendamento[]>([]);
+const LiaAppointmentsPage: React.FC = () => {
+  const [appointments, setAppointments] = useState<LiaAppointment[]>([]);
   const [statusFilter, setStatusFilter] = useState<'all' | 'agendado' | 'confirmado' | 'cancelado' | 'realizado' | 'ausente'>('all');
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
@@ -38,8 +37,8 @@ const JuliaAppointmentsPage: React.FC = () => {
       console.log('  - statusToUse:', statusToUse);
       console.log('  - Tipo do clinicIdToUse:', typeof clinicIdToUse);
       
-      console.log('🔍 DEBUG - Chamando buscarAgendamentosJulia...');
-      const data = await buscarAgendamentosJulia(
+      console.log('🔍 DEBUG - Chamando buscarAgendamentosLia...');
+      const data = await buscarAgendamentosLia(
         clinicIdToUse,
         statusToUse
       );
@@ -69,9 +68,9 @@ const JuliaAppointmentsPage: React.FC = () => {
     await loadAppointments();
   };
 
-  const handleStatusChange = async (appointmentId: string, newStatus: JuliaAgendamento['status']) => {
+  const handleStatusChange = async (appointmentId: string, newStatus: LiaAppointment['status']) => {
     try {
-      await atualizarStatusJulia(appointmentId, newStatus);
+      await atualizarStatusLia(appointmentId, newStatus);
       setAppointments(appointments.map(apt => 
         apt.id === appointmentId ? { ...apt, status: newStatus, atualizado_em: new Date().toISOString() } : apt
       ));
@@ -81,14 +80,14 @@ const JuliaAppointmentsPage: React.FC = () => {
     }
   };
 
-  const handleTransferToMainAgenda = async (appointment: JuliaAgendamento) => {
+  const handleTransferToMainAgenda = async (appointment: LiaAppointment) => {
     if (!user?.clinicId || user.clinicId === 'test-clinic-id') {
       alert('Funcionalidade não disponível no modo de teste');
       return;
     }
     
     try {
-      const sucesso = await transferirParaAgenda(appointment, user.clinicId);
+      const sucesso = await transferirParaAgendaLia(appointment, user.clinicId);
       if (sucesso) {
         alert('Agendamento transferido com sucesso para a agenda principal!');
         await handleRefresh(); // Recarregar dados
@@ -131,7 +130,7 @@ const JuliaAppointmentsPage: React.FC = () => {
       return dateB.getTime() - dateA.getTime();
     });
 
-  const getStatusColor = (status: JuliaAppointment['status']) => {
+  const getStatusColor = (status: LiaAppointment['status']) => {
     switch (status) {
       case 'agendado':
         return 'bg-yellow-100 text-yellow-800';
@@ -148,7 +147,7 @@ const JuliaAppointmentsPage: React.FC = () => {
     }
   };
 
-  const getStatusText = (status: JuliaAgendamento['status']) => {
+  const getStatusText = (status: LiaAppointment['status']) => {
     switch (status) {
       case 'agendado':
         return 'Agendado';
@@ -165,7 +164,7 @@ const JuliaAppointmentsPage: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: JuliaAgendamento['status']) => {
+  const getStatusIcon = (status: LiaAppointment['status']) => {
     switch (status) {
       case 'agendado':
         return <AlertCircle size={16} />;
@@ -182,7 +181,7 @@ const JuliaAppointmentsPage: React.FC = () => {
     }
   };
 
-  const getSourceIcon = (origem: JuliaAgendamento['origem']) => {
+  const getSourceIcon = (origem: LiaAppointment['origem']) => {
     switch (origem) {
       case 'whatsapp':
         return '💬';
@@ -203,8 +202,8 @@ const JuliaAppointmentsPage: React.FC = () => {
             <Bot size={24} className="text-blue-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Agendamentos da Júl.IA</h1>
-            <p className="text-gray-600">Solicitações de agendamento recebidas via assistente virtual</p>
+            <h1 className="text-2xl font-bold text-gray-900">Compromissos da Lia</h1>
+            <p className="text-gray-600">Solicitações de compromisso recebidas via assistente virtual</p>
           </div>
         </div>
         <button
@@ -339,22 +338,22 @@ const JuliaAppointmentsPage: React.FC = () => {
             <div className="bg-green-50 px-6 py-3 border-b border-green-200">
               <h3 className="text-lg font-semibold text-green-800 flex items-center">
                 <Calendar size={20} className="mr-2" />
-                Próximos Agendamentos ({upcomingAppointments.length})
+                Próximos Compromissos ({upcomingAppointments.length})
               </h3>
-              <p className="text-sm text-green-600">Agendamentos futuros ordenados por proximidade</p>
+              <p className="text-sm text-green-600">Compromissos futuros ordenados por proximidade</p>
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Paciente
+                      Cliente
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Data/Hora Solicitada
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Procedimento
+                      Serviço/Assunto
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Origem
@@ -429,7 +428,7 @@ const JuliaAppointmentsPage: React.FC = () => {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <select
                             value={appointment.status}
-                            onChange={(e) => handleStatusChange(appointment.id, e.target.value as JuliaAgendamento['status'])}
+                            onChange={(e) => handleStatusChange(appointment.id, e.target.value as LiaAppointment['status'])}
                             className={`px-2 py-1 text-xs font-semibold rounded-full border-0 focus:ring-2 focus:ring-blue-500 ${getStatusColor(appointment.status)}`}
                           >
                             <option value="agendado">Agendado</option>
@@ -449,14 +448,14 @@ const JuliaAppointmentsPage: React.FC = () => {
                                 <button 
                                   onClick={() => handleStatusChange(appointment.id, 'confirmado')}
                                   className="text-green-600 hover:text-green-800 transition-colors duration-200"
-                                  title="Confirmar agendamento"
+                                  title="Confirmar compromisso"
                                 >
                                   <CheckCircle size={16} />
                                 </button>
                                 <button 
                                   onClick={() => handleStatusChange(appointment.id, 'cancelado')}
                                   className="text-red-600 hover:text-red-800 transition-colors duration-200"
-                                  title="Cancelar agendamento"
+                                  title="Cancelar compromisso"
                                 >
                                   <XCircle size={16} />
                                 </button>
@@ -479,22 +478,22 @@ const JuliaAppointmentsPage: React.FC = () => {
             <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-700 flex items-center">
                 <Clock size={20} className="mr-2" />
-                Agendamentos Anteriores ({pastAppointments.length})
+                Compromissos Anteriores ({pastAppointments.length})
               </h3>
-              <p className="text-sm text-gray-500">Agendamentos que já passaram da data</p>
+              <p className="text-sm text-gray-500">Compromissos que já passaram da data</p>
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Paciente
+                      Cliente
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Data/Hora Solicitada
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Procedimento
+                      Serviço/Assunto
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Origem
@@ -562,7 +561,7 @@ const JuliaAppointmentsPage: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <select
                           value={appointment.status}
-                          onChange={(e) => handleStatusChange(appointment.id, e.target.value as JuliaAgendamento['status'])}
+                          onChange={(e) => handleStatusChange(appointment.id, e.target.value as LiaAppointment['status'])}
                           className={`px-2 py-1 text-xs font-semibold rounded-full border-0 focus:ring-2 focus:ring-blue-500 ${getStatusColor(appointment.status)}`}
                         >
                           <option value="agendado">Agendado</option>
@@ -582,14 +581,14 @@ const JuliaAppointmentsPage: React.FC = () => {
                               <button 
                                 onClick={() => handleStatusChange(appointment.id, 'confirmado')}
                                 className="text-green-600 hover:text-green-800 transition-colors duration-200"
-                                title="Confirmar agendamento"
+                                title="Confirmar compromisso"
                               >
                                 <CheckCircle size={16} />
                               </button>
                               <button 
                                 onClick={() => handleStatusChange(appointment.id, 'cancelado')}
                                 className="text-red-600 hover:text-red-800 transition-colors duration-200"
-                                title="Cancelar agendamento"
+                                title="Cancelar compromisso"
                               >
                                 <XCircle size={16} />
                               </button>
@@ -609,7 +608,7 @@ const JuliaAppointmentsPage: React.FC = () => {
         {filteredAppointments.length === 0 && (
           <div className="text-center py-8">
             <Bot size={48} className="mx-auto text-gray-400 mb-2" />
-            <p className="text-gray-500">Nenhum agendamento encontrado com os filtros aplicados.</p>
+            <p className="text-gray-500">Nenhum compromisso encontrado com os filtros aplicados.</p>
           </div>
         )}
       </div>
@@ -621,10 +620,9 @@ const JuliaAppointmentsPage: React.FC = () => {
             <Bot size={20} className="text-blue-600" />
           </div>
           <div className="ml-3">
-            <h3 className="text-sm font-medium text-blue-800">Integração com a Júlia</h3>
+            <h3 className="text-sm font-medium text-blue-800">Integração com a Lia</h3>
             <div className="mt-2 text-sm text-blue-700">
-              <p>Esta página recebe automaticamente os agendamentos processados pela Júl.IA via WhatsApp.</p>
-            
+              <p>Esta página recebe automaticamente os compromissos processados pela Lia via WhatsApp.</p>
             </div>
           </div>
         </div>
@@ -633,4 +631,4 @@ const JuliaAppointmentsPage: React.FC = () => {
   );
 };
 
-export default JuliaAppointmentsPage;
+export default LiaAppointmentsPage;

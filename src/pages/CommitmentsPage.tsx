@@ -4,13 +4,12 @@ import AppointmentModal from '../components/Calendar/AppointmentModal';
 import { Appointment, Dentist } from '../types';
 import { formatDateTimeBR, convertFromUTC } from '../utils/timezone';
 import { buscarAgendamentos } from '../services/appointmentService';
-import { buscarDentistas } from '../services/dentistService';
+import { buscarProfissionais } from '../services/professionalService';
 import { useAuth } from '../hooks/useAuth';
 
-
-const AppointmentsPage: React.FC = () => {
+const CommitmentsPage: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [dentists, setDentists] = useState<Dentist[]>([]);
+  const [professionals, setProfessionals] = useState<Dentist[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,9 +29,9 @@ const AppointmentsPage: React.FC = () => {
       try {
         setIsLoading(true);
         
-        // Carregar dentistas
-        const dentistData = await buscarDentistas(user.clinicId);
-        setDentists(dentistData.map(d => ({
+        // Carregar profissionais
+        const professionalData = await buscarProfissionais(user.clinicId);
+        setProfessionals(professionalData.map(d => ({
           id: d.dentista_id,
           name: d.nome,
           email: d.usuario?.email || '',
@@ -46,7 +45,7 @@ const AppointmentsPage: React.FC = () => {
           linkedUserId: d.usuario?.usuario_id,
         })));
         
-        // Carregar agendamentos
+        // Carregar compromissos
         const filtros = permissions.dentistId 
           ? { dentista_id: permissions.dentistId }
           : {};
@@ -54,7 +53,7 @@ const AppointmentsPage: React.FC = () => {
         const appointmentData = await buscarAgendamentos(filtros);
         setAppointments(appointmentData.map(a => ({
           id: a.id?.toString() || '',
-          patientName: a.nome_consulta || 'Paciente não informado',
+          patientName: a.nome_consulta || 'Cliente não informado',
           patientEmail: '',
           patientPhone: '',
           dentistId: a.dentista_id || '',
@@ -77,7 +76,8 @@ const AppointmentsPage: React.FC = () => {
 
     loadData();
   }, [user?.clinicId, permissions]);
-  // Filtrar agendamentos baseado nas permissões do usuário
+
+  // Filtrar compromissos baseado nas permissões do usuário
   const visibleAppointments = permissions.canViewAllAppointments
     ? appointments 
     : appointments.filter(apt => apt.dentistId === permissions.dentistId);
@@ -89,6 +89,7 @@ const AppointmentsPage: React.FC = () => {
       </div>
     );
   }
+
   const handleEditAppointment = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
     setIsModalOpen(true);
@@ -101,14 +102,14 @@ const AppointmentsPage: React.FC = () => {
 
   const handleSaveAppointment = (appointmentData: Omit<Appointment, 'id'>) => {
     if (selectedAppointment) {
-      // Editar agendamento existente
+      // Editar compromisso existente
       setAppointments(appointments.map(apt => 
         apt.id === selectedAppointment.id 
           ? { ...appointmentData, id: selectedAppointment.id }
           : apt
       ));
     } else {
-      // Adicionar novo agendamento
+      // Adicionar novo compromisso
       const newAppointment: Appointment = {
         ...appointmentData,
         id: Date.now().toString(),
@@ -120,7 +121,7 @@ const AppointmentsPage: React.FC = () => {
   };
 
   const handleDeleteAppointment = (appointmentId: string) => {
-    if (window.confirm('Tem certeza que deseja excluir este agendamento? Esta ação não pode ser desfeita.')) {
+    if (window.confirm('Tem certeza que deseja excluir este compromisso? Esta ação não pode ser desfeita.')) {
       setAppointments(appointments.filter(apt => apt.id !== appointmentId));
     }
   };
@@ -195,15 +196,15 @@ const AppointmentsPage: React.FC = () => {
     <div>
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Agendamentos</h1>
-          <p className="text-gray-600">Gerencie todos os agendamentos da clínica</p>
+          <h1 className="text-2xl font-bold text-gray-900">Compromissos</h1>
+          <p className="text-gray-600">Gerencie todos os compromissos da organização</p>
         </div>
         <button
           onClick={handleAddAppointment}
           className="mt-4 md:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
         >
           <Plus size={20} className="mr-2" />
-          Novo Agendamento
+          Novo Compromisso
         </button>
       </div>
 
@@ -215,7 +216,7 @@ const AppointmentsPage: React.FC = () => {
           </div>
           <input
             type="text"
-            placeholder="Buscar por paciente, email ou procedimento..."
+            placeholder="Buscar por cliente, email ou serviço/assunto..."
             className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -249,23 +250,23 @@ const AppointmentsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Lista de Agendamentos */}
+      {/* Lista de Compromissos */}
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Paciente
+                  Cliente
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Data e Horário
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Dentista
+                  Profissional
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Procedimento
+                  Serviço/Assunto
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
@@ -277,7 +278,7 @@ const AppointmentsPage: React.FC = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredAppointments.map((appointment) => {
-                const dentist = dentists.find((d) => d.id === appointment.dentistId);
+                const professional = professionals.find((d) => d.id === appointment.dentistId);
                 return (
                   <tr key={appointment.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -308,15 +309,15 @@ const AppointmentsPage: React.FC = () => {
                         Duração: {appointment.duracao_minutos} min
                       </div>
                       <div className="text-sm text-gray-400">
-                        Origem: {appointment.origem === 'app' ? 'Sistema' : 'Júl.IA'}
+                        Origem: {appointment.origem === 'app' ? 'Sistema' : 'Lia'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        Dr. {dentist?.name}
+                        Prof. {professional?.name}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {dentist?.specialization}
+                        {professional?.specialization}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -345,14 +346,14 @@ const AppointmentsPage: React.FC = () => {
                         <button 
                           onClick={() => handleEditAppointment(appointment)}
                           className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
-                          title="Editar agendamento"
+                          title="Editar compromisso"
                         >
                           <Edit size={16} />
                         </button>
                         <button 
                           onClick={() => handleDeleteAppointment(appointment.id)}
                           className="text-red-600 hover:text-red-800 transition-colors duration-200"
-                          title="Excluir agendamento"
+                          title="Excluir compromisso"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -368,12 +369,12 @@ const AppointmentsPage: React.FC = () => {
         {filteredAppointments.length === 0 && (
           <div className="text-center py-8">
             <Calendar size={48} className="mx-auto text-gray-400 mb-2" />
-            <p className="text-gray-500">Nenhum agendamento encontrado com os filtros aplicados.</p>
+            <p className="text-gray-500">Nenhum compromisso encontrado com os filtros aplicados.</p>
           </div>
         )}
       </div>
 
-      {/* Modal de Agendamento */}
+      {/* Modal de Compromisso */}
       {isModalOpen && (
         <AppointmentModal
           isOpen={isModalOpen}
@@ -382,7 +383,7 @@ const AppointmentsPage: React.FC = () => {
             setSelectedAppointment(null);
           }}
           date={selectedAppointment ? new Date(selectedAppointment.date) : new Date()}
-          dentists={dentists}
+          dentists={professionals}
           onSave={handleSaveAppointment}
           appointment={selectedAppointment}
         />
@@ -391,4 +392,4 @@ const AppointmentsPage: React.FC = () => {
   );
 };
 
-export default AppointmentsPage;
+export default CommitmentsPage;

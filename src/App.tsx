@@ -2,9 +2,9 @@ import React from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
-import JuliaAppointmentsPage from './pages/JuliaAppointmentsPage';
-import DentistsPage from './pages/DentistsPage';
-import AppointmentsPage from './pages/AppointmentsPage';
+import LiaAppointmentsPage from './pages/LiaAppointmentsPage';
+import ProfessionalsPage from './pages/ProfessionalsPage';
+import CommitmentsPage from './pages/CommitmentsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import SettingsPage from './pages/SettingsPage';
 import MainLayout from './components/Layout/MainLayout';
@@ -43,9 +43,9 @@ function App() {
             >
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/julia" element={<JuliaAppointmentsPage />} />
-              <Route path="/dentists" element={<DentistsPage />} />
-              <Route path="/appointments" element={<AppointmentsPage />} />
+              <Route path="/lia" element={<LiaAppointmentsPage />} />
+              <Route path="/professionals" element={<ProfessionalsPage />} />
+              <Route path="/commitments" element={<CommitmentsPage />} />
               <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path="/chat" element={<ChatInterface />} />
               <Route path="/settings" element={<SettingsPage />} />

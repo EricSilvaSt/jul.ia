@@ -1,30 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, User, CreditCard as Edit, Trash2, UserX, UserCheck } from 'lucide-react';
-import DentistCard from '../components/Dentists/DentistCard';
-import DentistModal from '../components/Dentists/DentistModal';
+import ProfessionalCard from '../components/Professionals/ProfessionalCard';
+import ProfessionalModal from '../components/Professionals/ProfessionalModal';
 import { Dentist } from '../types';
 import { useAuth } from '../hooks/useAuth';
-import { buscarDentistas, criarDentista, atualizarDentista, deletarDentista, buscarEspecialidades } from '../services/dentistService';
+import { buscarProfissionais, criarProfissional, atualizarProfissional, deletarProfissional, buscarAreasAtuacao } from '../services/professionalService';
 
-
-const DentistsPage: React.FC = () => {
-  const [dentists, setDentists] = useState<Dentist[]>([]);
+const ProfessionalsPage: React.FC = () => {
+  const [professionals, setProfessionals] = useState<Dentist[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDentist, setSelectedDentist] = useState<Dentist | null>(null);
+  const [selectedProfessional, setSelectedProfessional] = useState<Dentist | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive'>('all');
   const [isLoading, setIsLoading] = useState(true);
   const { user, permissions } = useAuth();
 
-  console.log('🦷 DEBUG - DentistsPage iniciado');
+  console.log('🦷 DEBUG - ProfessionalsPage iniciado');
   console.log('  - user:', user);
   console.log('  - user.clinicId:', user?.clinicId);
   console.log('  - permissions:', permissions);
 
-  // Carregar dentistas do Supabase
+  // Carregar profissionais do Supabase
   useEffect(() => {
-    const loadDentists = async () => {
-      console.log('🦷 DEBUG - loadDentists iniciado');
+    const loadProfessionals = async () => {
+      console.log('🦷 DEBUG - loadProfessionals iniciado');
       console.log('  - user.clinicId:', user?.clinicId);
       console.log('  - permissions:', permissions);
       
@@ -36,12 +35,12 @@ const DentistsPage: React.FC = () => {
       
       try {
         setIsLoading(true);
-        console.log('🦷 DEBUG - Chamando buscarDentistas...');
-        const data = await buscarDentistas(user.clinicId);
+        console.log('🦷 DEBUG - Chamando buscarProfissionais...');
+        const data = await buscarProfissionais(user.clinicId);
         console.log('🦷 DEBUG - Dados retornados:', data);
         console.log('🦷 DEBUG - Processando dados para o estado...');
         
-        setDentists(data.map(d => ({
+        setProfessionals(data.map(d => ({
           id: d.dentista_id,
           name: d.nome,
           email: d.email || 'Não informado',
@@ -53,18 +52,18 @@ const DentistsPage: React.FC = () => {
           availability: d.disponibilidade || {},
         })));
         
-        console.log('🦷 DEBUG - Estado atualizado com', data.length, 'dentistas');
-        console.log('🦷 DEBUG - Dentistas processados:', data.map(d => ({ id: d.dentista_id, nome: d.nome, clinica_id: d.clinica_id })));
+        console.log('🦷 DEBUG - Estado atualizado com', data.length, 'profissionais');
+        console.log('🦷 DEBUG - Profissionais processados:', data.map(d => ({ id: d.dentista_id, nome: d.nome, clinica_id: d.clinica_id })));
       } catch (error) {
-        console.error('❌ DEBUG - Erro ao carregar dentistas:', error);
+        console.error('❌ DEBUG - Erro ao carregar profissionais:', error);
         console.error('❌ DEBUG - Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
-        setDentists([]);
+        setProfessionals([]);
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadDentists();
+    loadProfessionals();
   }, [user?.clinicId]);
 
   // Verificar se usuário tem permissão para acessar esta página
@@ -76,10 +75,10 @@ const DentistsPage: React.FC = () => {
             <User size={64} className="mx-auto text-red-400 mb-4" />
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Acesso Restrito</h1>
             <p className="text-lg text-gray-600 mb-6">
-              Você não tem permissão para visualizar a lista de dentistas.
+              Você não tem permissão para visualizar a lista de profissionais.
             </p>
             <p className="text-gray-500">
-              Esta funcionalidade está disponível apenas para administradores da clínica.
+              Esta funcionalidade está disponível apenas para administradores da organização.
             </p>
           </div>
         </div>
@@ -87,68 +86,68 @@ const DentistsPage: React.FC = () => {
     );
   }
 
-  const handleEditDentist = (dentist: Dentist) => {
-    setSelectedDentist(dentist);
+  const handleEditProfessional = (professional: Dentist) => {
+    setSelectedProfessional(professional);
     setIsModalOpen(true);
   };
 
-  const handleAddDentist = () => {
-    setSelectedDentist(null);
+  const handleAddProfessional = () => {
+    setSelectedProfessional(null);
     setIsModalOpen(true);
   };
 
-  const handleSaveDentist = async (dentistData: Omit<Dentist, 'id' | 'createdAt'>) => {
-    console.log('🦷 DEBUG - handleSaveDentist chamado:', dentistData);
+  const handleSaveProfessional = async (professionalData: Omit<Dentist, 'id' | 'createdAt'>) => {
+    console.log('🦷 DEBUG - handleSaveProfessional chamado:', professionalData);
     
     if (!user?.clinicId) {
-      alert('Erro: ID da clínica não encontrado');
+      alert('Erro: ID da organização não encontrado');
       return;
     }
     
     try {
       console.log('🦷 DEBUG - Preparando dados para salvar...');
       
-      // Buscar ID da especialidade pelo nome
-      const especialidades = await buscarEspecialidades();
-      const especialidadeEncontrada = especialidades.find(e => e.nome_especialidade === dentistData.specialization);
-      const especialidadeId = especialidadeEncontrada?.id_especialidade || 1;
+      // Buscar ID da área de atuação pelo nome
+      const areasAtuacao = await buscarAreasAtuacao();
+      const areaEncontrada = areasAtuacao.find(e => e.nome_especialidade === professionalData.specialization);
+      const areaId = areaEncontrada?.id_especialidade || 1;
       
-      console.log('🦷 DEBUG - Especialidade mapeada:', dentistData.specialization, '->', especialidadeId);
+      console.log('🦷 DEBUG - Área de atuação mapeada:', professionalData.specialization, '->', areaId);
       
-      if (selectedDentist) {
-        console.log('🦷 DEBUG - Editando dentista existente:', selectedDentist.id);
-        // Editar dentista existente
-        await atualizarDentista(selectedDentist.id, {
-          nome: dentistData.name,
-          email: dentistData.email,
-          telefone: dentistData.phoneNumber,
-          especialidade: especialidadeId,
-          cro: dentistData.cro,
-          ativo: dentistData.isActive,
-          disponibilidade: dentistData.availability,
+      if (selectedProfessional) {
+        console.log('🦷 DEBUG - Editando profissional existente:', selectedProfessional.id);
+        // Editar profissional existente
+        await atualizarProfissional(selectedProfessional.id, {
+          nome: professionalData.name,
+          email: professionalData.email,
+          telefone: professionalData.phoneNumber,
+          especialidade: areaId,
+          cro: professionalData.cro,
+          ativo: professionalData.isActive,
+          disponibilidade: professionalData.availability,
         });
       } else {
-        console.log('🦷 DEBUG - Criando novo dentista');
-        // Adicionar novo dentista
-        await criarDentista({
-          nome: dentistData.name,
-          email: dentistData.email,
-          telefone: dentistData.phoneNumber,
-          especialidade: especialidadeId,
-          cro: dentistData.cro,
-          ativo: dentistData.isActive,
-          disponibilidade: dentistData.availability,
+        console.log('🦷 DEBUG - Criando novo profissional');
+        // Adicionar novo profissional
+        await criarProfissional({
+          nome: professionalData.name,
+          email: professionalData.email,
+          telefone: professionalData.phoneNumber,
+          especialidade: areaId,
+          cro: professionalData.cro,
+          ativo: professionalData.isActive,
+          disponibilidade: professionalData.availability,
           clinica_id: user.clinicId,
         });
       }
       
-      console.log('🦷 DEBUG - Dentista salvo, recarregando lista...');
+      console.log('🦷 DEBUG - Profissional salvo, recarregando lista...');
       // Recarregar lista
-      const data = await buscarDentistas(user.clinicId);
-      console.log('🦷 DEBUG - Lista recarregada:', data.length, 'dentistas');
+      const data = await buscarProfissionais(user.clinicId);
+      console.log('🦷 DEBUG - Lista recarregada:', data.length, 'profissionais');
       console.log('🦷 DEBUG - Dados recarregados:', data.map(d => ({ id: d.dentista_id, nome: d.nome })));
       
-      setDentists(data.map(d => ({
+      setProfessionals(data.map(d => ({
         id: d.dentista_id,
         name: d.nome,
         email: d.email || 'Não informado',
@@ -161,29 +160,29 @@ const DentistsPage: React.FC = () => {
       })));
       
       setIsModalOpen(false);
-      setSelectedDentist(null);
+      setSelectedProfessional(null);
       console.log('🦷 DEBUG - Modal fechado, operação concluída');
       
     } catch (error) {
-      console.error('Erro ao salvar dentista:', error);
-      alert('Erro ao salvar dentista. Tente novamente.');
+      console.error('Erro ao salvar profissional:', error);
+      alert('Erro ao salvar profissional. Tente novamente.');
     }
   };
 
-  const handleToggleActive = async (dentistId: string) => {
+  const handleToggleActive = async (professionalId: string) => {
     try {
-      // Encontrar o dentista atual
-      const dentist = dentists.find(d => d.id === dentistId);
-      if (!dentist) return;
+      // Encontrar o profissional atual
+      const professional = professionals.find(d => d.id === professionalId);
+      if (!professional) return;
       
       // Alternar status
-      await atualizarDentista(dentistId, {
-        ativo: !dentist.isActive
+      await atualizarProfissional(professionalId, {
+        ativo: !professional.isActive
       });
       
       // Recarregar lista
-      const data = await buscarDentistas(user.clinicId!);
-      setDentists(data.map(d => ({
+      const data = await buscarProfissionais(user.clinicId!);
+      setProfessionals(data.map(d => ({
         id: d.dentista_id,
         name: d.nome,
         email: d.email || 'Não informado',
@@ -197,22 +196,22 @@ const DentistsPage: React.FC = () => {
       
     } catch (error) {
       console.error('Erro ao alterar status:', error);
-      alert('Erro ao alterar status do dentista. Tente novamente.');
+      alert('Erro ao alterar status do profissional. Tente novamente.');
     }
   };
 
-  const handleDeleteDentist = async (dentistId: string) => {
-    if (!window.confirm('Tem certeza que deseja excluir este dentista? Esta ação não pode ser desfeita.')) {
+  const handleDeleteProfessional = async (professionalId: string) => {
+    if (!window.confirm('Tem certeza que deseja excluir este profissional? Esta ação não pode ser desfeita.')) {
       return;
     }
     
     try {
-      await deletarDentista(dentistId);
-      setDentists(dentists.filter(d => d.id !== dentistId));
-      alert('Dentista deletado com sucesso!');
+      await deletarProfissional(professionalId);
+      setProfessionals(professionals.filter(d => d.id !== professionalId));
+      alert('Profissional deletado com sucesso!');
     } catch (error) {
-      console.error('Erro ao deletar dentista:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao deletar dentista';
+      console.error('Erro ao deletar profissional:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao deletar profissional';
       alert(errorMessage);
     }
   };
@@ -224,17 +223,18 @@ const DentistsPage: React.FC = () => {
       </div>
     );
   }
-  const filteredDentists = dentists.filter((dentist) => {
+
+  const filteredProfessionals = professionals.filter((professional) => {
     const matchesSearch = 
-      dentist.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      dentist.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      dentist.specialization.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      dentist.cro.toLowerCase().includes(searchTerm.toLowerCase());
+      professional.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      professional.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      professional.specialization.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      professional.cro.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesFilter = 
       filterActive === 'all' ||
-      (filterActive === 'active' && dentist.isActive) ||
-      (filterActive === 'inactive' && !dentist.isActive);
+      (filterActive === 'active' && professional.isActive) ||
+      (filterActive === 'inactive' && !professional.isActive);
 
     return matchesSearch && matchesFilter;
   });
@@ -243,15 +243,15 @@ const DentistsPage: React.FC = () => {
     <div>
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Gestão de Dentistas</h1>
-          <p className="text-gray-600">Gerencie os profissionais da sua clínica</p>
+          <h1 className="text-2xl font-bold text-gray-900">Gestão de Profissionais</h1>
+          <p className="text-gray-600">Gerencie os profissionais da sua organização</p>
         </div>
         <button
-          onClick={handleAddDentist}
+          onClick={handleAddProfessional}
           className="mt-4 md:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
         >
           <Plus size={20} className="mr-2" />
-          Adicionar Dentista
+          Adicionar Profissional
         </button>
       </div>
 
@@ -262,7 +262,7 @@ const DentistsPage: React.FC = () => {
           </div>
           <input
             type="text"
-            placeholder="Buscar dentistas por nome, email, especialização ou CRO..."
+            placeholder="Buscar profissionais por nome, email, área de atuação ou identificador..."
             className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -278,7 +278,7 @@ const DentistsPage: React.FC = () => {
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            Todos ({dentists.length})
+            Todos ({professionals.length})
           </button>
           <button
             onClick={() => setFilterActive('active')}
@@ -288,7 +288,7 @@ const DentistsPage: React.FC = () => {
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            Ativos ({dentists.filter(d => d.isActive).length})
+            Ativos ({professionals.filter(d => d.isActive).length})
           </button>
           <button
             onClick={() => setFilterActive('inactive')}
@@ -298,43 +298,43 @@ const DentistsPage: React.FC = () => {
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            Inativos ({dentists.filter(d => !d.isActive).length})
+            Inativos ({professionals.filter(d => !d.isActive).length})
           </button>
         </div>
       </div>
 
-      {filteredDentists.length === 0 ? (
+      {filteredProfessionals.length === 0 ? (
         <div className="bg-white rounded-lg shadow-md p-6 text-center">
           <User size={48} className="mx-auto text-gray-400 mb-2" />
-          <p className="text-gray-500">Nenhum dentista encontrado com os filtros aplicados.</p>
+          <p className="text-gray-500">Nenhum profissional encontrado com os filtros aplicados.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredDentists.map((dentist) => (
-            <DentistCard
-              key={dentist.id}
-              dentist={dentist}
-              onEdit={handleEditDentist}
+          {filteredProfessionals.map((professional) => (
+            <ProfessionalCard
+              key={professional.id}
+              dentist={professional}
+              onEdit={handleEditProfessional}
               onToggleActive={handleToggleActive}
-              onDelete={handleDeleteDentist}
+              onDelete={handleDeleteProfessional}
             />
           ))}
         </div>
       )}
 
       {isModalOpen && (
-        <DentistModal
+        <ProfessionalModal
           isOpen={isModalOpen}
           onClose={() => {
             setIsModalOpen(false);
-            setSelectedDentist(null);
+            setSelectedProfessional(null);
           }}
-          dentist={selectedDentist}
-          onSave={handleSaveDentist}
+          dentist={selectedProfessional}
+          onSave={handleSaveProfessional}
         />
       )}
     </div>
   );
 };
 
-export default DentistsPage;
+export default ProfessionalsPage;

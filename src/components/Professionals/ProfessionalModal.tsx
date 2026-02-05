@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2 } from 'lucide-react';
 import { Dentist } from '../../types';
-import { buscarEspecialidades } from '../../services/dentistService';
+import { buscarAreasAtuacao } from '../../services/professionalService';
 
-interface DentistModalProps {
+interface ProfessionalModalProps {
   isOpen: boolean;
   onClose: () => void;
   dentist?: Dentist | null;
   onSave: (dentist: Omit<Dentist, 'id' | 'createdAt'>) => void;
 }
 
-interface Especialidade {
+interface AreaAtuacao {
   id_especialidade: number;
   nome_especialidade: string;
 }
@@ -25,13 +25,13 @@ const weekDays = [
   { key: 'domingo', label: 'Domingo' },
 ];
 
-const DentistModal: React.FC<DentistModalProps> = ({
+const ProfessionalModal: React.FC<ProfessionalModalProps> = ({
   isOpen,
   onClose,
   dentist,
   onSave,
 }) => {
-  const [especialidades, setEspecialidades] = useState<Especialidade[]>([]);
+  const [areasAtuacao, setAreasAtuacao] = useState<AreaAtuacao[]>([]);
   const [formData, setFormData] = useState<Omit<Dentist, 'id' | 'createdAt'>>({
     name: '',
     email: '',
@@ -42,53 +42,62 @@ const DentistModal: React.FC<DentistModalProps> = ({
     availability: {},
   });
 
-  // Carregar especialidades
+  // Carregar áreas de atuação
   useEffect(() => {
-    const loadEspecialidades = async () => {
-      console.log('🦷 DEBUG - Modal: loadEspecialidades INICIADO');
+    const loadAreasAtuacao = async () => {
+      console.log('🦷 DEBUG - Modal: loadAreasAtuacao INICIADO');
       console.log('🦷 DEBUG - Modal: isOpen =', isOpen);
       
       try {
-        console.log('🦷 DEBUG - Modal: Chamando buscarEspecialidades...');
-        const data = await buscarEspecialidades();
+        console.log('🦷 DEBUG - Modal: Chamando buscarAreasAtuacao...');
+        const data = await buscarAreasAtuacao();
         console.log('🦷 DEBUG - Modal: Dados retornados:', data);
         console.log('🦷 DEBUG - Modal: Quantidade:', data?.length);
         
         if (data && data.length > 0) {
-          console.log('🦷 DEBUG - Modal: Setando especialidades no estado');
-          setEspecialidades(data);
+          console.log('🦷 DEBUG - Modal: Setando áreas de atuação no estado');
+          setAreasAtuacao(data);
         } else {
           console.log('🦷 DEBUG - Modal: Dados vazios, usando fallback');
-          setEspecialidades([
-            { id_especialidade: 1, nome_especialidade: 'Clínica Geral' },
-            { id_especialidade: 2, nome_especialidade: 'Ortodontia' },
-            { id_especialidade: 3, nome_especialidade: 'Endodontia' },
-            { id_especialidade: 4, nome_especialidade: 'Periodontia' },
-            { id_especialidade: 5, nome_especialidade: 'Implantodontia' },
+          setAreasAtuacao([
+            { id_especialidade: 1, nome_especialidade: 'Clínica Geral (Saúde)' },
+            { id_especialidade: 2, nome_especialidade: 'Ortodontia (Saúde)' },
+            { id_especialidade: 3, nome_especialidade: 'Endodontia (Saúde)' },
+            { id_especialidade: 4, nome_especialidade: 'Periodontia (Saúde)' },
+            { id_especialidade: 5, nome_especialidade: 'Implantodontia (Saúde)' },
+            { id_especialidade: 6, nome_especialidade: 'Consultoria' },
+            { id_especialidade: 7, nome_especialidade: 'Terapia' },
+            { id_especialidade: 8, nome_especialidade: 'Educação' },
+            { id_especialidade: 9, nome_especialidade: 'Tecnologia' },
+            { id_especialidade: 10, nome_especialidade: 'Administração' },
           ]);
         }
         
       } catch (error) {
-        console.error('❌ DEBUG - Modal: Erro ao carregar especialidades:', error);
+        console.error('❌ DEBUG - Modal: Erro ao carregar áreas de atuação:', error);
         console.log('🦷 DEBUG - Modal: Usando fallback devido ao erro');
-        setEspecialidades(data);
-        setEspecialidades([
-          { id_especialidade: 1, nome_especialidade: 'Clínica Geral' },
-          { id_especialidade: 2, nome_especialidade: 'Ortodontia' },
-          { id_especialidade: 3, nome_especialidade: 'Endodontia' },
-          { id_especialidade: 4, nome_especialidade: 'Periodontia' },
-          { id_especialidade: 5, nome_especialidade: 'Implantodontia' },
+        setAreasAtuacao([
+          { id_especialidade: 1, nome_especialidade: 'Clínica Geral (Saúde)' },
+          { id_especialidade: 2, nome_especialidade: 'Ortodontia (Saúde)' },
+          { id_especialidade: 3, nome_especialidade: 'Endodontia (Saúde)' },
+          { id_especialidade: 4, nome_especialidade: 'Periodontia (Saúde)' },
+          { id_especialidade: 5, nome_especialidade: 'Implantodontia (Saúde)' },
+          { id_especialidade: 6, nome_especialidade: 'Consultoria' },
+          { id_especialidade: 7, nome_especialidade: 'Terapia' },
+          { id_especialidade: 8, nome_especialidade: 'Educação' },
+          { id_especialidade: 9, nome_especialidade: 'Tecnologia' },
+          { id_especialidade: 10, nome_especialidade: 'Administração' },
         ]);
       }
       
-      console.log('🦷 DEBUG - Modal: loadEspecialidades FINALIZADO');
+      console.log('🦷 DEBUG - Modal: loadAreasAtuacao FINALIZADO');
     };
 
     if (isOpen) {
       console.log('🦷 DEBUG - Modal: Modal está aberto, iniciando carregamento...');
-      loadEspecialidades();
+      loadAreasAtuacao();
     } else {
-      console.log('🦷 DEBUG - Modal: Modal fechado, não carregando especialidades');
+      console.log('🦷 DEBUG - Modal: Modal fechado, não carregando áreas de atuação');
     }
   }, [isOpen]);
 
@@ -172,7 +181,7 @@ const DentistModal: React.FC<DentistModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('🦷 DEBUG - Salvando dentista:', formData);
+    console.log('🦷 DEBUG - Salvando profissional:', formData);
     onSave(formData);
   };
 
@@ -183,7 +192,7 @@ const DentistModal: React.FC<DentistModalProps> = ({
       <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold text-gray-800">
-            {dentist ? 'Editar Dentista' : 'Novo Dentista'}
+            {dentist ? 'Editar Profissional' : 'Novo Profissional'}
           </h2>
           <button
             onClick={onClose}
@@ -242,14 +251,14 @@ const DentistModal: React.FC<DentistModalProps> = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  CRO *
+                  Identificador *
                 </label>
                 <input
                   type="text"
                   name="cro"
                   value={formData.cro}
                   onChange={handleChange}
-                  placeholder="Ex: CRO-SP 12345"
+                  placeholder="Ex: ID-12345"
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
                   required
                 />
@@ -257,7 +266,7 @@ const DentistModal: React.FC<DentistModalProps> = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Especialização *
+                  Área de Atuação *
                 </label>
                 <select
                   name="specialization"
@@ -266,15 +275,15 @@ const DentistModal: React.FC<DentistModalProps> = ({
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
                   required
                 >
-                  <option value="">Selecione uma especialização</option>
-                  {especialidades.map((esp) => (
-                    <option key={esp.id_especialidade} value={esp.nome_especialidade}>
-                      {esp.nome_especialidade}
+                  <option value="">Selecione uma área de atuação</option>
+                  {areasAtuacao.map((area) => (
+                    <option key={area.id_especialidade} value={area.nome_especialidade}>
+                      {area.nome_especialidade}
                     </option>
                   ))}
                 </select>
                 <div className="mt-1 text-xs text-gray-500">
-                  DEBUG: {especialidades.length} especialidades carregadas
+                  DEBUG: {areasAtuacao.length} áreas de atuação carregadas
                 </div>
               </div>
 
@@ -287,15 +296,15 @@ const DentistModal: React.FC<DentistModalProps> = ({
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <label className="ml-2 block text-sm text-gray-700">
-                  Dentista ativo
+                  Profissional ativo
                 </label>
               </div>
             </div>
           </div>
 
-          {/* Horários de Trabalho */}
+          {/* Disponibilidade por Dia */}
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Horários de Trabalho por Dia</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Disponibilidade por Dia</h3>
             
             <div className="space-y-4">
               {weekDays.map((day) => {
@@ -379,4 +388,4 @@ const DentistModal: React.FC<DentistModalProps> = ({
   );
 };
 
-export default DentistModal;
+export default ProfessionalModal;

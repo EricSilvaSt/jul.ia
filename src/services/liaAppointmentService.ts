@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabase';
 
-export interface JuliaAgendamento {
+export interface LiaAppointment {
   id: string;
   nome_paciente: string;
   telefone_paciente: string;
@@ -8,7 +8,6 @@ export interface JuliaAgendamento {
   data_solicitada: string; // formato YYYY-MM-DD
   horario_solicitado: string; // formato HH:mm
   procedimento: string;
-  status: 'pending' | 'approved' | 'rejected' | 'scheduled';
   status: 'agendado' | 'confirmado' | 'cancelado' | 'realizado' | 'ausente';
   origem: 'whatsapp' | 'telegram' | 'web';
   conversa_id?: string;
@@ -18,10 +17,10 @@ export interface JuliaAgendamento {
 }
 
 /**
- * Busca agendamentos da Júl.IA
+ * Busca agendamentos da Lia
  */
-export const buscarAgendamentosJulia = async (clinicaId?: string, status?: string): Promise<JuliaAgendamento[]> => {
-  console.log('🔍 DEBUG - buscarAgendamentosJulia iniciado');
+export const buscarAgendamentosLia = async (clinicaId?: string, status?: string): Promise<LiaAppointment[]> => {
+  console.log('🔍 DEBUG - buscarAgendamentosLia iniciado');
   console.log('  - clinicaId recebido:', clinicaId);
   console.log('  - status recebido:', status);
   
@@ -57,7 +56,7 @@ export const buscarAgendamentosJulia = async (clinicaId?: string, status?: strin
       details: error.details,
       hint: error.hint
     });
-    throw new Error(`Erro ao buscar agendamentos da Júl.IA: ${error.message}`);
+    throw new Error(`Erro ao buscar agendamentos da Lia: ${error.message}`);
   }
 
   console.log('✅ DEBUG - Query executada com sucesso');
@@ -68,9 +67,9 @@ export const buscarAgendamentosJulia = async (clinicaId?: string, status?: strin
 };
 
 /**
- * Atualiza status de um agendamento da Júl.IA
+ * Atualiza status de um agendamento da Lia
  */
-export const atualizarStatusJulia = async (
+export const atualizarStatusLia = async (
   id: string, 
   status: 'agendado' | 'confirmado' | 'cancelado' | 'realizado' | 'ausente'
 ): Promise<void> => {
@@ -88,16 +87,16 @@ export const atualizarStatusJulia = async (
 };
 
 /**
- * Transfere agendamento aprovado da Júl.IA para agenda principal
+ * Transfere agendamento aprovado da Lia para agenda principal
  */
-export const transferirParaAgenda = async (juliaAgendamento: JuliaAgendamento, clinicId: string): Promise<boolean> => {
+export const transferirParaAgendaLia = async (liaAppointment: LiaAppointment, clinicId: string): Promise<boolean> => {
   try {
     // Primeiro, buscar dados do paciente ou criar se não existir
     // (implementação simplificada - em produção seria mais robusta)
     
     // Converter horário local para UTC
-    const dataHoraLocal = `${juliaAgendamento.data_solicitada} ${juliaAgendamento.horario_solicitado}`;
-    const inicioUtc = convertToUTC(juliaAgendamento.data_solicitada, juliaAgendamento.horario_solicitado);
+    const dataHoraLocal = `${liaAppointment.data_solicitada} ${liaAppointment.horario_solicitado}`;
+    const inicioUtc = convertToUTC(liaAppointment.data_solicitada, liaAppointment.horario_solicitado);
     
     // Usar a função RPC para marcar o agendamento
     const params = {
@@ -107,15 +106,15 @@ export const transferirParaAgenda = async (juliaAgendamento: JuliaAgendamento, c
       p_especialidade: 1, // Você precisará mapear procedimento para especialidade
       p_inicio: inicioUtc,
       p_duracao: 60, // duração padrão, pode ser configurável
-      p_nome_consulta: juliaAgendamento.procedimento,
-      p_origem: 'julia' as const
+      p_nome_consulta: liaAppointment.procedimento,
+      p_origem: 'lia' as const
     };
 
     const resultado = await marcarAgendamento(params);
     
     if (resultado.reservado) {
-      // Atualizar status do agendamento da Júl.IA para 'scheduled'
-      await atualizarStatusJulia(juliaAgendamento.id, 'agendado');
+      // Atualizar status do agendamento da Lia para 'scheduled'
+      await atualizarStatusLia(liaAppointment.id, 'agendado');
       return true;
     } else {
       throw new Error(resultado.mensagem || 'Horário não disponível');

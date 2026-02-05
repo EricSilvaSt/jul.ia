@@ -124,7 +124,7 @@ const MainLayout: React.FC = () => {
               <p className="text-sm font-medium">{user.name}</p>
               <p className="text-xs text-gray-500">
                 {user.role === 'clinic' ? 'Acesso de Teste' : 
-                 user.role === 'admin' ? 'Administrador' : 'Dentista'}
+                 user.role === 'admin' ? 'Administrador' : 'Profissional'}
               </p>
             </div>
           )}
