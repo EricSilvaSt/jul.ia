@@ -1,4 +1,4 @@
 // Logo do Agendante carregada do Supabase Storage
-const logoUrl = 'https://euqknbfgxvntqyrtcozg.supabase.co/storage/v1/object/public/images/julia-agenda-1.png';
+const logoUrl = 'https://euqknbfgxvntqyrtcozg.supabase.co/storage/v1/object/public/images/agendante-logo.jpg';
 
 export default logoUrl;
