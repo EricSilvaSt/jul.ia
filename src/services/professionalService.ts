@@ -43,13 +43,13 @@ export interface CreateProfessionalData {
  * Busca profissionais da organização - VERSÃO SIMPLIFICADA
  */
 export const buscarProfissionais = async (clinicaId: string): Promise<ProfessionalComplete[]> => {
-  console.log('🦷 DEBUG - buscarProfissionais iniciado');
+  console.log('DEBUG - buscarProfissionais iniciado');
   console.log('  - clinicaId:', clinicaId);
   console.log('  - clinicaId type:', typeof clinicaId);
   
   // Verificar se estamos em modo demo ou sem configuração do Supabase
   if (!import.meta.env.VITE_SUPABASE_URL || clinicaId === 'demo-clinic-id') {
-    console.log('🦷 DEBUG - Retornando dados mock (modo demo)');
+    console.log('DEBUG - Retornando dados mock (modo demo)');
     return [
       {
         dentista_id: 'prof-1',
@@ -119,8 +119,8 @@ export const buscarProfissionais = async (clinicaId: string): Promise<Profession
     .eq('clinica_id', clinicaId)
     .order('nome');
 
-  console.log('🦷 DEBUG - Resultado da query:', { data, error });
-  console.log('🦷 DEBUG - Dados encontrados:', data?.length || 0, 'profissionais');
+  console.log('DEBUG - Resultado da query:', { data, error });
+  console.log('DEBUG - Dados encontrados:', data?.length || 0, 'profissionais');
 
   if (error) {
     console.error('❌ DEBUG - Erro:', error);
@@ -134,7 +134,7 @@ export const buscarProfissionais = async (clinicaId: string): Promise<Profession
  * Cria novo profissional
  */
 export const criarProfissional = async (professionalData: CreateProfessionalData): Promise<ProfessionalComplete> => {
-  console.log('🦷 DEBUG - Criando profissional:', professionalData);
+  console.log('DEBUG - Criando profissional:', professionalData);
   
   // Verificar se estamos em modo demo
   if (!import.meta.env.VITE_SUPABASE_URL || professionalData.clinica_id === 'demo-clinic-id') {
@@ -149,7 +149,7 @@ export const criarProfissional = async (professionalData: CreateProfessionalData
     .select('*')
     .single();
 
-  console.log('🦷 DEBUG - Resultado criação:', { data, error });
+  console.log('DEBUG - Resultado criação:', { data, error });
 
   if (error) {
     console.error('❌ DEBUG - Erro ao criar:', error);
@@ -166,7 +166,7 @@ export const atualizarProfissional = async (
   professionalId: string, 
   updates: Partial<CreateProfessionalData>
 ): Promise<void> => {
-  console.log('🦷 DEBUG - Atualizando profissional:', professionalId, updates);
+  console.log('DEBUG - Atualizando profissional:', professionalId, updates);
   
   // Verificar se estamos em modo demo
   if (!import.meta.env.VITE_SUPABASE_URL || professionalId.startsWith('prof-')) {
@@ -190,7 +190,7 @@ export const atualizarProfissional = async (
  * Deleta profissional
  */
 export const deletarProfissional = async (professionalId: string): Promise<void> => {
-  console.log('🦷 DEBUG - Deletando profissional:', professionalId);
+  console.log('DEBUG - Deletando profissional:', professionalId);
   
   // Verificar se estamos em modo demo
   if (!import.meta.env.VITE_SUPABASE_URL || professionalId.startsWith('prof-')) {

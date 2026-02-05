@@ -9,9 +9,9 @@ interface AuthState {
   isAuthenticated: boolean;
   permissions: {
     canViewAllAppointments: boolean;
-    canViewAllDentists: boolean;
+    canViewAllProfessionals: boolean;
     canManageUsers: boolean;
-    dentistId?: string;
+    professionalId?: string;
   };
 }
 
@@ -23,7 +23,7 @@ export const useAuth = () => {
     isAuthenticated: false,
     permissions: {
       canViewAllAppointments: false,
-      canViewAllDentists: false,
+      canViewAllProfessionals: false,
       canManageUsers: false,
     },
   });
@@ -52,7 +52,7 @@ export const useAuth = () => {
             isLoading: false,
             permissions: {
               canViewAllAppointments: false,
-              canViewAllDentists: false,
+              canViewAllProfessionals: false,
               canManageUsers: false,
             }
           }));
@@ -64,7 +64,7 @@ export const useAuth = () => {
           isLoading: false,
           permissions: {
             canViewAllAppointments: false,
-            canViewAllDentists: false,
+            canViewAllProfessionals: false,
             canManageUsers: false,
           }
         }));
@@ -101,7 +101,7 @@ export const useAuth = () => {
       clinic: null,
       permissions: {
         canViewAllAppointments: false,
-        canViewAllDentists: false,
+        canViewAllProfessionals: false,
         canManageUsers: false,
       },
       isLoading: false,

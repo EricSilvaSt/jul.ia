@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, CreditCard as Edit, Trash2, UserCheck, UserX, Crown } from 'lucide-react';
 import { CalendarIntegration } from '../types';
 import CalendarConnector from '../components/Integration/CalendarConnector';
-import MegaApiConnector from '../components/Integration/MegaApiConnector';
+import EvolutionApiConnector from '../components/Integration/EvolutionApiConnector';
 import UserManagementModal from '../components/Settings/UserManagementModal';
 import { useAuth } from '../hooks/useAuth';
 import { buscarUsuarios, criarUsuario, atualizarUsuario, deletarUsuario, alternarStatusUsuario } from '../services/userService';
@@ -465,7 +465,7 @@ const SettingsPage: React.FC = () => {
 
           {activeTab === 'integrations' && (
             <div className="space-y-6">
-              <MegaApiConnector />
+              <EvolutionApiConnector />
               <CalendarConnector
                 integrations={integrations}
                 onConnect={handleConnect}

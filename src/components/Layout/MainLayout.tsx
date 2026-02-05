@@ -29,11 +29,11 @@ const MainLayout: React.FC = () => {
     { name: 'Painel', icon: <Calendar size={20} />, path: '/dashboard' },
     { name: 'Lia', icon: <MessageCircle size={20} />, path: '/lia' },
     { name: 'Compromissos', icon: <CalendarCheck size={20} />, path: '/commitments' },
-    { 
-      name: 'Profissionais', 
-      icon: <Users size={20} />, 
+    {
+      name: 'Profissionais',
+      icon: <Users size={20} />,
       path: '/professionals',
-      requiresPermission: 'canViewAllDentists'
+      requiresPermission: 'canViewAllProfessionals'
     },
     { 
       name: 'Relatórios', 
@@ -59,7 +59,7 @@ const MainLayout: React.FC = () => {
         >
           <Menu size={24} />
         </button>
-        <img src={logo} alt="Júl.IA Agenda Logo" className="h-12" />
+        <img src={logo} alt="Lia Agenda Logo" className="h-12" />
       </div>
 
       {/* Sidebar Backdrop */}
@@ -77,7 +77,7 @@ const MainLayout: React.FC = () => {
         } lg:static lg:z-0 lg:flex lg:flex-col`}
       >
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-          <img src={logo} alt="Júl.IA Agenda Logo" className="h-18" />
+          <img src={logo} alt="Lia Agenda Logo" className="h-18" />
           <button
             onClick={closeSidebar}
             className="p-2 rounded-md text-gray-600 hover:bg-gray-100 focus:outline-none lg:hidden"

@@ -2,7 +2,7 @@ import { supabase, supabaseAdmin } from '../lib/supabase';
 import bcrypt from 'bcryptjs';
 
 export interface LoginCredentials {
-  identifier: string; // email para admin, CRO para dentista, login para clínica
+  identifier: string; // email para admin, ID de registro para profissional, login para clínica
   password: string;
 }
 
@@ -10,9 +10,9 @@ export interface AuthUser {
   id: string;
   name: string;
   email?: string;
-  role: 'clinic' | 'admin' | 'dentist';
+  role: 'clinic' | 'admin' | 'professional';
   clinicId?: string;
-  dentistId?: string;
+  professionalId?: string;
   isActive: boolean;
 }
 
@@ -21,7 +21,7 @@ export interface ClinicInfo {
   nome_fantasia: string;
   email: string;
   telefone_contato: string;
-  telefone_julia?: string;
+  telefone_lia?: string;
   cnpj?: string;
   razao_social?: string;
   endereco?: string;
@@ -110,9 +110,9 @@ export const authenticateUser = async (credentials: LoginCredentials): Promise<A
             id: userData.usuario_id,
             name: userData.nome,
             email: userData.email,
-            role: userData.tipo_usuario as 'admin' | 'dentist' | 'clinic',
+            role: userData.tipo_usuario as 'admin' | 'professional' | 'clinic',
             clinicId: userData.clinica_id,
-            dentistId: userData.dentista_id,
+            professionalId: userData.dentista_id,
             isActive: userData.ativo,
           };
         }
@@ -180,9 +180,9 @@ export const authenticateUser = async (credentials: LoginCredentials): Promise<A
       id: userData.usuario_id,
       name: userData.nome,
       email: userData.email,
-      role: userData.tipo_usuario as 'admin' | 'dentist' | 'clinic',
+      role: userData.tipo_usuario as 'admin' | 'professional' | 'clinic',
       clinicId: userData.clinica_id,
-      dentistId: userData.dentista_id,
+      professionalId: userData.dentista_id,
       isActive: userData.ativo,
     };
 
@@ -215,7 +215,7 @@ export const getClinicInfo = async (clinicId: string): Promise<ClinicInfo> => {
         nome_fantasia,
         email,
         telefone_contato,
-        telefone_julia,
+        telefone_lia,
         cnpj,
         razao_social,
         endereco,
@@ -256,7 +256,7 @@ export const getClinicInfo = async (clinicId: string): Promise<ClinicInfo> => {
         nome_fantasia: clinicData.nome_fantasia,
         email: clinicData.email,
         telefone_contato: clinicData.telefone_contato,
-        telefone_julia: clinicData.telefone_julia,
+        telefone_lia: clinicData.telefone_lia,
         cnpj: clinicData.cnpj,
         razao_social: clinicData.razao_social,
         endereco: clinicData.endereco,
@@ -337,9 +337,9 @@ const createTestClinicData = (clinicId: string): ClinicInfo => {
 export const getUserPermissions = (user: AuthUser) => {
   const permissions = {
     canViewAllAppointments: false,
-    canViewAllDentists: false,
+    canViewAllProfessionals: false,
     canManageUsers: false,
-    dentistId: undefined as string | undefined,
+    professionalId: undefined as string | undefined,
   };
 
   switch (user.role) {
@@ -347,16 +347,16 @@ export const getUserPermissions = (user: AuthUser) => {
     case 'clinic':
       // Administradores e clínicas veem tudo da sua clínica
       permissions.canViewAllAppointments = true;
-      permissions.canViewAllDentists = true;
+      permissions.canViewAllProfessionals = true;
       permissions.canManageUsers = true;
       break;
-      
-    case 'dentist':
-      // Dentistas só veem sua própria agenda
+
+    case 'professional':
+      // Profissionais só veem sua própria agenda
       permissions.canViewAllAppointments = false;
-      permissions.canViewAllDentists = false;
+      permissions.canViewAllProfessionals = false;
       permissions.canManageUsers = false;
-      permissions.dentistId = user.dentistId;
+      permissions.professionalId = user.professionalId;
       break;
   }
 

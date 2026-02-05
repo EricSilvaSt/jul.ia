@@ -15,7 +15,7 @@ const ProfessionalsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { user, permissions } = useAuth();
 
-  console.log('🦷 DEBUG - ProfessionalsPage iniciado');
+  console.log('DEBUG - ProfessionalsPage iniciado');
   console.log('  - user:', user);
   console.log('  - user.clinicId:', user?.clinicId);
   console.log('  - permissions:', permissions);
@@ -23,7 +23,7 @@ const ProfessionalsPage: React.FC = () => {
   // Carregar profissionais do Supabase
   useEffect(() => {
     const loadProfessionals = async () => {
-      console.log('🦷 DEBUG - loadProfessionals iniciado');
+      console.log('DEBUG - loadProfessionals iniciado');
       console.log('  - user.clinicId:', user?.clinicId);
       console.log('  - permissions:', permissions);
       
@@ -35,10 +35,10 @@ const ProfessionalsPage: React.FC = () => {
       
       try {
         setIsLoading(true);
-        console.log('🦷 DEBUG - Chamando buscarProfissionais...');
+        console.log('DEBUG - Chamando buscarProfissionais...');
         const data = await buscarProfissionais(user.clinicId);
-        console.log('🦷 DEBUG - Dados retornados:', data);
-        console.log('🦷 DEBUG - Processando dados para o estado...');
+        console.log('DEBUG - Dados retornados:', data);
+        console.log('DEBUG - Processando dados para o estado...');
         
         setProfessionals(data.map(d => ({
           id: d.dentista_id,
@@ -52,8 +52,8 @@ const ProfessionalsPage: React.FC = () => {
           availability: d.disponibilidade || {},
         })));
         
-        console.log('🦷 DEBUG - Estado atualizado com', data.length, 'profissionais');
-        console.log('🦷 DEBUG - Profissionais processados:', data.map(d => ({ id: d.dentista_id, nome: d.nome, clinica_id: d.clinica_id })));
+        console.log('DEBUG - Estado atualizado com', data.length, 'profissionais');
+        console.log('DEBUG - Profissionais processados:', data.map(d => ({ id: d.dentista_id, nome: d.nome, clinica_id: d.clinica_id })));
       } catch (error) {
         console.error('❌ DEBUG - Erro ao carregar profissionais:', error);
         console.error('❌ DEBUG - Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
@@ -97,7 +97,7 @@ const ProfessionalsPage: React.FC = () => {
   };
 
   const handleSaveProfessional = async (professionalData: Omit<Dentist, 'id' | 'createdAt'>) => {
-    console.log('🦷 DEBUG - handleSaveProfessional chamado:', professionalData);
+    console.log('DEBUG - handleSaveProfessional chamado:', professionalData);
     
     if (!user?.clinicId) {
       alert('Erro: ID da organização não encontrado');
@@ -105,17 +105,17 @@ const ProfessionalsPage: React.FC = () => {
     }
     
     try {
-      console.log('🦷 DEBUG - Preparando dados para salvar...');
+      console.log('DEBUG - Preparando dados para salvar...');
       
       // Buscar ID da área de atuação pelo nome
       const areasAtuacao = await buscarAreasAtuacao();
       const areaEncontrada = areasAtuacao.find(e => e.nome_especialidade === professionalData.specialization);
       const areaId = areaEncontrada?.id_especialidade || 1;
       
-      console.log('🦷 DEBUG - Área de atuação mapeada:', professionalData.specialization, '->', areaId);
+      console.log('DEBUG - Área de atuação mapeada:', professionalData.specialization, '->', areaId);
       
       if (selectedProfessional) {
-        console.log('🦷 DEBUG - Editando profissional existente:', selectedProfessional.id);
+        console.log('DEBUG - Editando profissional existente:', selectedProfessional.id);
         // Editar profissional existente
         await atualizarProfissional(selectedProfessional.id, {
           nome: professionalData.name,
@@ -127,7 +127,7 @@ const ProfessionalsPage: React.FC = () => {
           disponibilidade: professionalData.availability,
         });
       } else {
-        console.log('🦷 DEBUG - Criando novo profissional');
+        console.log('DEBUG - Criando novo profissional');
         // Adicionar novo profissional
         await criarProfissional({
           nome: professionalData.name,
@@ -141,11 +141,11 @@ const ProfessionalsPage: React.FC = () => {
         });
       }
       
-      console.log('🦷 DEBUG - Profissional salvo, recarregando lista...');
+      console.log('DEBUG - Profissional salvo, recarregando lista...');
       // Recarregar lista
       const data = await buscarProfissionais(user.clinicId);
-      console.log('🦷 DEBUG - Lista recarregada:', data.length, 'profissionais');
-      console.log('🦷 DEBUG - Dados recarregados:', data.map(d => ({ id: d.dentista_id, nome: d.nome })));
+      console.log('DEBUG - Lista recarregada:', data.length, 'profissionais');
+      console.log('DEBUG - Dados recarregados:', data.map(d => ({ id: d.dentista_id, nome: d.nome })));
       
       setProfessionals(data.map(d => ({
         id: d.dentista_id,
@@ -161,7 +161,7 @@ const ProfessionalsPage: React.FC = () => {
       
       setIsModalOpen(false);
       setSelectedProfessional(null);
-      console.log('🦷 DEBUG - Modal fechado, operação concluída');
+      console.log('DEBUG - Modal fechado, operação concluída');
       
     } catch (error) {
       console.error('Erro ao salvar profissional:', error);

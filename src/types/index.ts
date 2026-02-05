@@ -2,13 +2,13 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'dentist';
+  role: 'admin' | 'professional';
   phoneNumber?: string;
   specialization?: string;
   isActive: boolean;
   createdAt: string;
   lastLogin?: string;
-  linkedDentistId?: string; // Para usuários do tipo dentista
+  linkedProfessionalId?: string;
 }
 
 export interface Appointment {
@@ -16,24 +16,25 @@ export interface Appointment {
   patientName: string;
   patientEmail: string;
   patientPhone: string;
-  dentistId: string;
+  professionalId: string;
   data_agendamento: string; // UTC ISO string
   fim_agendamento: string; // UTC ISO string
   status: 'pendente' | 'confirmado' | 'concluido' | 'cancelado' | 'falta';
   procedure: string;
   notes?: string;
   duracao_minutos: number;
-  origem: 'app' | 'julia';
+  origem: 'app' | 'lia';
   motivo_cancelamento?: string;
 }
 
+// Interface que representa profissionais de qualquer área
 export interface Dentist {
   id: string;
   name: string;
   email: string;
   phoneNumber: string;
   specialization: string;
-  cro: string; // Registro no Conselho Regional de Odontologia
+  cro: string; // ID de registro profissional
   isActive: boolean;
   createdAt: string;
   availability: {
@@ -43,6 +44,9 @@ export interface Dentist {
     };
   };
 }
+
+// Alias para melhor semântica
+export type Professional = Dentist;
 
 export interface Organization {
   id: string;

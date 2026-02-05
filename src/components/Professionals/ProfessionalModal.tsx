@@ -45,59 +45,59 @@ const ProfessionalModal: React.FC<ProfessionalModalProps> = ({
   // Carregar áreas de atuação
   useEffect(() => {
     const loadAreasAtuacao = async () => {
-      console.log('🦷 DEBUG - Modal: loadAreasAtuacao INICIADO');
-      console.log('🦷 DEBUG - Modal: isOpen =', isOpen);
-      
+      console.log('DEBUG - Modal: loadAreasAtuacao INICIADO');
+      console.log('DEBUG - Modal: isOpen =', isOpen);
+
       try {
-        console.log('🦷 DEBUG - Modal: Chamando buscarAreasAtuacao...');
+        console.log('DEBUG - Modal: Chamando buscarAreasAtuacao...');
         const data = await buscarAreasAtuacao();
-        console.log('🦷 DEBUG - Modal: Dados retornados:', data);
-        console.log('🦷 DEBUG - Modal: Quantidade:', data?.length);
-        
+        console.log('DEBUG - Modal: Dados retornados:', data);
+        console.log('DEBUG - Modal: Quantidade:', data?.length);
+
         if (data && data.length > 0) {
-          console.log('🦷 DEBUG - Modal: Setando áreas de atuação no estado');
+          console.log('DEBUG - Modal: Setando áreas de atuação no estado');
           setAreasAtuacao(data);
         } else {
-          console.log('🦷 DEBUG - Modal: Dados vazios, usando fallback');
+          console.log('DEBUG - Modal: Dados vazios, usando fallback');
           setAreasAtuacao([
-            { id_especialidade: 1, nome_especialidade: 'Clínica Geral (Saúde)' },
-            { id_especialidade: 2, nome_especialidade: 'Ortodontia (Saúde)' },
-            { id_especialidade: 3, nome_especialidade: 'Endodontia (Saúde)' },
-            { id_especialidade: 4, nome_especialidade: 'Periodontia (Saúde)' },
-            { id_especialidade: 5, nome_especialidade: 'Implantodontia (Saúde)' },
-            { id_especialidade: 6, nome_especialidade: 'Consultoria' },
-            { id_especialidade: 7, nome_especialidade: 'Terapia' },
-            { id_especialidade: 8, nome_especialidade: 'Educação' },
-            { id_especialidade: 9, nome_especialidade: 'Tecnologia' },
-            { id_especialidade: 10, nome_especialidade: 'Administração' },
+            { id_especialidade: 1, nome_especialidade: 'Consultoria' },
+            { id_especialidade: 2, nome_especialidade: 'Assessoria' },
+            { id_especialidade: 3, nome_especialidade: 'Terapia' },
+            { id_especialidade: 4, nome_especialidade: 'Educação' },
+            { id_especialidade: 5, nome_especialidade: 'Tecnologia' },
+            { id_especialidade: 6, nome_especialidade: 'Administração' },
+            { id_especialidade: 7, nome_especialidade: 'Saúde' },
+            { id_especialidade: 8, nome_especialidade: 'Jurídico' },
+            { id_especialidade: 9, nome_especialidade: 'Marketing' },
+            { id_especialidade: 10, nome_especialidade: 'Recursos Humanos' },
           ]);
         }
-        
+
       } catch (error) {
         console.error('❌ DEBUG - Modal: Erro ao carregar áreas de atuação:', error);
-        console.log('🦷 DEBUG - Modal: Usando fallback devido ao erro');
+        console.log('DEBUG - Modal: Usando fallback devido ao erro');
         setAreasAtuacao([
-          { id_especialidade: 1, nome_especialidade: 'Clínica Geral (Saúde)' },
-          { id_especialidade: 2, nome_especialidade: 'Ortodontia (Saúde)' },
-          { id_especialidade: 3, nome_especialidade: 'Endodontia (Saúde)' },
-          { id_especialidade: 4, nome_especialidade: 'Periodontia (Saúde)' },
-          { id_especialidade: 5, nome_especialidade: 'Implantodontia (Saúde)' },
-          { id_especialidade: 6, nome_especialidade: 'Consultoria' },
-          { id_especialidade: 7, nome_especialidade: 'Terapia' },
-          { id_especialidade: 8, nome_especialidade: 'Educação' },
-          { id_especialidade: 9, nome_especialidade: 'Tecnologia' },
-          { id_especialidade: 10, nome_especialidade: 'Administração' },
+          { id_especialidade: 1, nome_especialidade: 'Consultoria' },
+          { id_especialidade: 2, nome_especialidade: 'Assessoria' },
+          { id_especialidade: 3, nome_especialidade: 'Terapia' },
+          { id_especialidade: 4, nome_especialidade: 'Educação' },
+          { id_especialidade: 5, nome_especialidade: 'Tecnologia' },
+          { id_especialidade: 6, nome_especialidade: 'Administração' },
+          { id_especialidade: 7, nome_especialidade: 'Saúde' },
+          { id_especialidade: 8, nome_especialidade: 'Jurídico' },
+          { id_especialidade: 9, nome_especialidade: 'Marketing' },
+          { id_especialidade: 10, nome_especialidade: 'Recursos Humanos' },
         ]);
       }
-      
-      console.log('🦷 DEBUG - Modal: loadAreasAtuacao FINALIZADO');
+
+      console.log('DEBUG - Modal: loadAreasAtuacao FINALIZADO');
     };
 
     if (isOpen) {
-      console.log('🦷 DEBUG - Modal: Modal está aberto, iniciando carregamento...');
+      console.log('DEBUG - Modal: Modal está aberto, iniciando carregamento...');
       loadAreasAtuacao();
     } else {
-      console.log('🦷 DEBUG - Modal: Modal fechado, não carregando áreas de atuação');
+      console.log('DEBUG - Modal: Modal fechado, não carregando áreas de atuação');
     }
   }, [isOpen]);
 
@@ -179,7 +179,7 @@ const ProfessionalModal: React.FC<ProfessionalModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('🦷 DEBUG - Salvando profissional:', formData);
+    console.log('DEBUG - Salvando profissional:', formData);
     onSave(formData);
   };
 

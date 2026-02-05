@@ -14,16 +14,16 @@ interface AppointmentModalProps {
 }
 
 const procedures = [
-  'Limpeza',
+  'Reunião',
   'Consulta',
-  'Obturação',
-  'Canal',
-  'Extração',
-  'Clareamento',
-  'Coroa',
-  'Ponte',
-  'Implante',
-  'Ortodontia',
+  'Atendimento',
+  'Avaliação',
+  'Acompanhamento',
+  'Procedimento',
+  'Sessão',
+  'Workshop',
+  'Treinamento',
+  'Auditoria',
 ];
 
 const AppointmentModal: React.FC<AppointmentModalProps> = ({
@@ -40,11 +40,11 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
     patientName: appointment?.patientName || '',
     patientEmail: appointment?.patientEmail || '',
     patientPhone: appointment?.patientPhone || '',
-    dentistId: appointment?.dentistId || '',
+    professionalId: appointment?.professionalId || '',
     data_agendamento: appointment?.data_agendamento || '',
     fim_agendamento: appointment?.fim_agendamento || '',
     status: appointment?.status || 'pendente',
-    procedure: appointment?.procedure || 'Consulta',
+    procedure: appointment?.procedure || 'Atendimento',
     notes: appointment?.notes || '',
     duracao_minutos: appointment?.duracao_minutos || 60,
     origem: 'app',
@@ -106,7 +106,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
         // Criar novo agendamento usando RPC
         const resultado = await marcarAgendamento({
           p_clinica: 'uuid-da-clinica', // TODO: pegar da sessão/contexto
-          p_dentista: formData.dentistId,
+          p_dentista: formData.professionalId,
           p_paciente: 'uuid-do-paciente', // TODO: buscar/criar paciente
           p_especialidade: 1, // TODO: mapear procedimento para especialidade
           p_inicio: inicioUtc,
@@ -135,7 +135,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
       <div className="bg-white rounded-lg shadow-lg w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-xl font-semibold text-gray-800">
-            {appointment ? 'Editar Consulta' : 'Nova Consulta'}
+            {appointment ? 'Editar Compromisso' : 'Novo Compromisso'}
           </h2>
           <button
             onClick={onClose}
@@ -219,19 +219,19 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Dentista
+              Profissional
             </label>
             <select
-              name="dentistId"
-              value={formData.dentistId}
+              name="professionalId"
+              value={formData.professionalId}
               onChange={handleChange}
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
               required
             >
-              <option value="">Selecione um dentista</option>
+              <option value="">Selecione um profissional</option>
               {dentists.map((dentist) => (
                 <option key={dentist.id} value={dentist.id}>
-                  Dr. {dentist.name} {dentist.specialization ? `(${dentist.specialization})` : ''}
+                  {dentist.name} {dentist.specialization ? `(${dentist.specialization})` : ''}
                 </option>
               ))}
             </select>
@@ -239,7 +239,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Procedimento
+              Tipo de Atendimento
             </label>
             <select
               name="procedure"
@@ -248,7 +248,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
               required
             >
-              <option value="">Selecione um procedimento</option>
+              <option value="">Selecione um tipo</option>
               {procedures.map((procedure) => (
                 <option key={procedure} value={procedure}>
                   {procedure}
@@ -259,7 +259,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
 
           <div className="pt-2 border-t">
             <h3 className="text-sm font-medium text-gray-700 mb-2">
-              Informações do Paciente
+              Informações do Cliente
             </h3>
             <div className="space-y-3">
               <div>
@@ -316,7 +316,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
               onChange={handleChange}
               rows={3}
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-              placeholder="Observações sobre a consulta..."
+              placeholder="Observações sobre o compromisso..."
             ></textarea>
           </div>
 

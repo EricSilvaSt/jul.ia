@@ -13,7 +13,7 @@ const ChatInterface: React.FC = () => {
     {
       id: '1',
       sender: 'assistant',
-      text: 'Olá! Eu sou a Júl.IA, sua assistente virtual. Como posso ajudá-lo hoje?',
+      text: 'Olá! Eu sou a Lia, sua assistente virtual. Como posso ajudá-lo hoje?',
       timestamp: new Date(),
     },
   ]);
@@ -49,10 +49,10 @@ const ChatInterface: React.FC = () => {
     // Simular resposta da IA
     setTimeout(() => {
       let responseText = '';
-      
-      if (input.toLowerCase().includes('consulta') || input.toLowerCase().includes('agendar')) {
+
+      if (input.toLowerCase().includes('compromisso') || input.toLowerCase().includes('agendar')) {
         responseText = "Ficarei feliz em ajudá-lo a agendar um compromisso. Que dia e horário funcionam melhor para você?";
-      } else if (input.toLowerCase().includes('dentista')) {
+      } else if (input.toLowerCase().includes('profissional')) {
         responseText = "Temos vários profissionais disponíveis. Você tem alguma preferência ou um serviço específico em mente?";
       } else if (input.toLowerCase().includes('cancelar')) {
         responseText = "Posso ajudá-lo a cancelar seu compromisso. Poderia confirmar seu nome e a data do compromisso?";
@@ -80,8 +80,8 @@ const ChatInterface: React.FC = () => {
   return (
     <div className="flex flex-col bg-white rounded-lg shadow-md h-[600px] overflow-hidden">
       <div className="p-4 bg-blue-600 text-white">
-        <h2 className="text-lg font-semibold">Chat com Júl.IA</h2>
-        <p className="text-sm text-blue-100">Sua assistente para agendamentos odontológicos</p>
+        <h2 className="text-lg font-semibold">Chat com Lia</h2>
+        <p className="text-sm text-blue-100">Sua assistente de agendamentos inteligente</p>
       </div>
 
       <div className="flex-1 p-4 overflow-y-auto">

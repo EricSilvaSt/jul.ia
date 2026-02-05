@@ -56,7 +56,7 @@ const CommitmentsPage: React.FC = () => {
           patientName: a.nome_consulta || 'Cliente não informado',
           patientEmail: '',
           patientPhone: '',
-          dentistId: a.dentista_id || '',
+          professionalId: a.dentista_id || '',
           data_agendamento: a.data_agendamento || '',
           fim_agendamento: a.fim_agendamento || '',
           status: a.status || 'pendente',
@@ -79,8 +79,8 @@ const CommitmentsPage: React.FC = () => {
 
   // Filtrar compromissos baseado nas permissões do usuário
   const visibleAppointments = permissions.canViewAllAppointments
-    ? appointments 
-    : appointments.filter(apt => apt.dentistId === permissions.dentistId);
+    ? appointments
+    : appointments.filter(apt => apt.professionalId === permissions.dentistId);
 
   if (isLoading) {
     return (

@@ -53,10 +53,10 @@ const DashboardPage: React.FC = () => {
         const appointmentData = await buscarAgendamentos(filtros);
         setAppointments(appointmentData.map(a => ({
           id: a.id?.toString() || '',
-          patientName: a.nome_consulta || 'Paciente não informado',
+          patientName: a.nome_consulta || 'Cliente não informado',
           patientEmail: '',
           patientPhone: '',
-          dentistId: a.dentista_id || '',
+          professionalId: a.dentista_id || '',
           data_agendamento: a.data_agendamento || '',
           fim_agendamento: a.fim_agendamento || '',
           status: a.status || 'pendente',
@@ -76,10 +76,10 @@ const DashboardPage: React.FC = () => {
 
     loadData();
   }, [user?.clinicId, permissions]);
-  // Filtrar consultas baseado nas permissões do usuário
+  // Filtrar compromissos baseado nas permissões do usuário
   const visibleAppointments = permissions.canViewAllAppointments
-    ? appointments 
-    : appointments.filter(apt => apt.dentistId === permissions.dentistId);
+    ? appointments
+    : appointments.filter(apt => apt.professionalId === permissions.dentistId);
 
   const handleAddAppointment = (appointment: Omit<Appointment, 'id'>) => {
     const newAppointment: Appointment = {
