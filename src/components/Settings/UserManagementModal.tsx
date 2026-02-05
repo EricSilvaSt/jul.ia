@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { buscarDentistas } from '../../services/dentistService';
+import { buscarProfissionais } from '../../services/professionalService';
 import { useAuth } from '../../hooks/useAuth';
 
 interface Usuario {
