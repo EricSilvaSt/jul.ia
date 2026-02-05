@@ -88,21 +88,21 @@ const ProfessionalCard: React.FC<ProfessionalCardProps> = ({
       <div className="p-4 bg-gray-50 border-t border-gray-200">
         <div className="flex space-x-2">
           <button 
-            onClick={() => onEdit(dentist)}
+            onClick={() => onEdit(professional)}
             className="flex-1 flex items-center justify-center py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 text-sm"
           >
             <Edit size={16} className="mr-1" />
             Editar
           </button>
           <button 
-            onClick={() => onToggleActive(dentist.id)}
+            onClick={() => onToggleActive(professional.id)}
             className={`flex-1 flex items-center justify-center py-2 px-3 rounded-md transition-colors duration-200 text-sm ${
-              dentist.isActive
+              professional.isActive
                 ? 'bg-yellow-600 hover:bg-yellow-700 text-white'
                 : 'bg-green-600 hover:bg-green-700 text-white'
             }`}
           >
-            {dentist.isActive ? (
+            {professional.isActive ? (
               <>
                 <UserX size={16} className="mr-1" />
                 Desativar
@@ -115,7 +115,7 @@ const ProfessionalCard: React.FC<ProfessionalCardProps> = ({
             )}
           </button>
           <button 
-            onClick={() => onDelete(dentist.id)}
+            onClick={() => onDelete(professional.id)}
             className="flex items-center justify-center py-2 px-3 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200 text-sm"
           >
             <Trash2 size={16} />

@@ -228,8 +228,8 @@ const ProfessionalsPage: React.FC = () => {
     const matchesSearch = 
       professional.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       professional.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      professional.specialization.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      professional.cro.toLowerCase().includes(searchTerm.toLowerCase());
+      professional.areaAtuacao.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      professional.identificador.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesFilter = 
       filterActive === 'all' ||
