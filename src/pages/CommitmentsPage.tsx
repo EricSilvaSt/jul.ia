@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Plus, Edit, Trash2, Calendar, Clock, User, Phone, Mail } from 'lucide-react';
+import { Search, Filter, Plus, CreditCard as Edit, Trash2, Calendar, Clock, User, Phone, Mail } from 'lucide-react';
 import AppointmentModal from '../components/Calendar/AppointmentModal';
 import { Appointment, Dentist } from '../types';
 import { formatDateTimeBR, convertFromUTC } from '../utils/timezone';
