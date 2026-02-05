@@ -489,7 +489,7 @@ const SettingsPage: React.FC = () => {
                         defaultChecked
                       />
                       <label htmlFor="email-appointments" className="ml-2 block text-sm text-gray-700">
-                        Notificações de novas consultas
+                        Notificações de novos compromissos
                       </label>
                     </div>
                     <div className="flex items-center">
@@ -500,7 +500,7 @@ const SettingsPage: React.FC = () => {
                         defaultChecked
                       />
                       <label htmlFor="email-cancellations" className="ml-2 block text-sm text-gray-700">
-                        Cancelamentos de consultas
+                        Cancelamentos de compromissos
                       </label>
                     </div>
                     <div className="flex items-center">
@@ -528,7 +528,7 @@ const SettingsPage: React.FC = () => {
                         defaultChecked
                       />
                       <label htmlFor="sms-patient-reminder" className="ml-2 block text-sm text-gray-700">
-                        Enviar lembretes de consulta para pacientes
+                        Enviar lembretes de compromissos para os clientes
                       </label>
                     </div>
                     <div className="flex items-center">
@@ -539,7 +539,7 @@ const SettingsPage: React.FC = () => {
                         defaultChecked
                       />
                       <label htmlFor="sms-confirmation" className="ml-2 block text-sm text-gray-700">
-                        Solicitar confirmações de consulta
+                        Solicitar confirmações de agendammento
                       </label>
                     </div>
                   </div>
@@ -578,7 +578,7 @@ const SettingsPage: React.FC = () => {
                 <div>
                   <h2 className="text-lg font-medium text-gray-900">Usuários e Permissões</h2>
                   <p className="text-sm text-gray-500">
-                    Gerencie contas de usuário e permissões para a equipe da sua clínica.
+                    Gerencie contas de usuário e permissões para a sua equipe.
                   </p>
                 </div>
                 <button
