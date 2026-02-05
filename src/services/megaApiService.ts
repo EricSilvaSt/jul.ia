@@ -219,11 +219,11 @@ export const sendAppointmentReminder = async (
   appointmentDate: string,
   appointmentTime: string
 ): Promise<MegaApiResponse> => {
-  const message = `🔔 *Lembrete - Redeorto Salvador*
+  const message = `🔔 *Lembrete - Lia*
 
 Olá ${patientName}!
 
-Lembrando que você tem consulta agendada:
+Lembrando que você tem um compromisso agendado:
 
 📅 *Amanhã - ${appointmentDate}*
 🕐 *Horário:* ${appointmentTime}
