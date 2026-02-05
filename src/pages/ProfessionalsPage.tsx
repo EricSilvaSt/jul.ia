@@ -67,7 +67,7 @@ const ProfessionalsPage: React.FC = () => {
   }, [user?.clinicId]);
 
   // Verificar se usuário tem permissão para acessar esta página
-  if (!permissions.canViewAllDentists) {
+  if (!permissions.canViewAllProfessionals) {
     return (
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">

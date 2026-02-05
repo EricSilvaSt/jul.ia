@@ -30,7 +30,7 @@ const DashboardPage: React.FC = () => {
         setIsLoading(true);
         
         // Carregar dentistas (apenas se tiver permissão)
-        if (permissions.canViewAllDentists) {
+        if (permissions.canViewAllProfessionals) {
           const dentistData = await buscarProfissionais(user.clinicId);
           setDentists(dentistData.map(d => ({
             id: d.dentista_id,
@@ -135,7 +135,7 @@ const DashboardPage: React.FC = () => {
           bgColor="bg-blue-100"
           iconColor="text-blue-600"
         />
-        {permissions.canViewAllDentists && (
+        {permissions.canViewAllProfessionals && (
           <StatCard
           title="Total de Profissionais"
             value={dentists.filter(d => d.isActive).length}
@@ -283,7 +283,7 @@ const DashboardPage: React.FC = () => {
         />
       </div>
 
-      {permissions.canViewAllDentists && (
+      {permissions.canViewAllProfessionals && (
         <div className="bg-white p-6 rounded-lg shadow-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-800">
