@@ -27,7 +27,7 @@ const MainLayout: React.FC = () => {
 
   const menuItems = [
     { name: 'Painel', icon: <Calendar size={20} />, path: '/dashboard' },
-    { name: 'Júlia', icon: <MessageCircle size={20} />, path: '/julia' },
+    { name: 'Lia', icon: <MessageCircle size={20} />, path: '/lia' },
     { name: 'Agendamentos', icon: <CalendarCheck size={20} />, path: '/appointments' },
     { 
       name: 'Dentistas', 

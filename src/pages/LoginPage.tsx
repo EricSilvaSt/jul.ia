@@ -57,13 +57,13 @@ const LoginPage: React.FC = () => {
         <img
           className="mx-auto h-29 w-auto"
           src={logo}
-          alt="Júl.IA Agenda Logo"
+          alt="Agendante Logo"
         />
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Entre na sua conta
+          Acesse sua conta
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Use seu email (admin) ou CRO (dentista) para fazer login
+          Use seu email (administrador) ou identificador (profissional) para fazer login
         </p>
       </div>
 
@@ -233,12 +233,12 @@ const LoginPage: React.FC = () => {
 
             <div className="mt-6">
               <a
-                href="https://wa.me/5571999999999?text=Olá!%20Gostaria%20de%20conhecer%20a%20Júl.IA%20Agenda%20para%20minha%20clínica%20odontológica"
+                href="https://wa.me/5571999999999?text=Olá!%20Gostaria%20de%20conhecer%20o%20Agendante%20para%20minha%20organização"
                 className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Fale com a Júl.IA!
+                Fale com a Lia!
               </a>
             </div>
           </div>
