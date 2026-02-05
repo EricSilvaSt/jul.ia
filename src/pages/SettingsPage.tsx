@@ -220,14 +220,14 @@ const SettingsPage: React.FC = () => {
         <div className="p-6">
           {activeTab === 'general' && (
             <div className="space-y-6">
-              <h2 className="text-lg font-medium text-gray-900">Informações da Clínica</h2>
+              <h2 className="text-lg font-medium text-gray-900">Informações da Empresa</h2>
               
               <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
                 <div className="flex">
                   <div className="ml-3">
                     <p className="text-sm text-blue-700">
-                      <strong>Informação:</strong> Os dados da clínica são gerenciados pelo administrador da plataforma. 
-                      Para alterações, entre em contato com o suporte.
+                      <strong>Informação:</strong> Os dados da empresa são gerenciados pelo administrador da plataforma. 
+                      Para alterações, entre em contato com o suporte em https://suporte.eria.tec.br.
                     </p>
                   </div>
                 </div>
@@ -296,7 +296,7 @@ const SettingsPage: React.FC = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    Telefone da Júl.IA
+                    Telefone da Lia
                   </label>
                   <input
                     type="tel"
