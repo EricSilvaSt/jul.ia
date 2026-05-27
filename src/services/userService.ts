@@ -3,8 +3,8 @@ import { hashPassword } from './authService';
 
 export interface Usuario {
   usuario_id: string;
-  clinica_id: string;
-  dentista_id?: string;
+  empresa_id: string;
+  colaborador_id?: string;
   nome: string;
   email?: string;
   tipo_usuario: 'admin' | 'dentist';
@@ -17,32 +17,29 @@ export interface CreateUserData {
   email?: string;
   senha: string;
   tipo_usuario: 'admin' | 'dentist';
-  clinica_id: string;
-  dentista_id?: string;
+  empresa_id: string;
+  colaborador_id?: string;
   ativo: boolean;
 }
 
-/**
- * Busca usuários da clínica
- */
 export const buscarUsuarios = async (clinicaId: string): Promise<Usuario[]> => {
   const { data, error } = await supabase
     .from('usuario')
     .select(`
       usuario_id,
-      clinica_id,
-      dentista_id,
+      empresa_id,
+      colaborador_id,
       nome,
       email,
       tipo_usuario,
       ativo,
       criado_em,
-      dentistas (
+      colaboradores (
         nome,
         cro
       )
     `)
-    .eq('clinica_id', clinicaId)
+    .eq('empresa_id', clinicaId)
     .order('criado_em', { ascending: false });
 
   if (error) {
@@ -52,16 +49,9 @@ export const buscarUsuarios = async (clinicaId: string): Promise<Usuario[]> => {
   return data || [];
 };
 
-/**
- * Cria novo usuário
- */
 export const criarUsuario = async (userData: CreateUserData): Promise<Usuario> => {
-  // Criptografar senha antes de salvar
   const hashedPassword = await hashPassword(userData.senha);
-  const userDataWithHashedPassword = {
-    ...userData,
-    senha: hashedPassword,
-  };
+  const userDataWithHashedPassword = { ...userData, senha: hashedPassword };
 
   const { data, error } = await supabase
     .from('usuario')
@@ -76,14 +66,10 @@ export const criarUsuario = async (userData: CreateUserData): Promise<Usuario> =
   return data;
 };
 
-/**
- * Atualiza usuário existente
- */
 export const atualizarUsuario = async (
-  usuarioId: string, 
+  usuarioId: string,
   updates: Partial<CreateUserData>
 ): Promise<void> => {
-  // Se a senha está sendo atualizada, criptografar
   let finalUpdates = { ...updates };
   if (updates.senha) {
     finalUpdates.senha = await hashPassword(updates.senha);
@@ -99,9 +85,6 @@ export const atualizarUsuario = async (
   }
 };
 
-/**
- * Deleta usuário
- */
 export const deletarUsuario = async (usuarioId: string): Promise<void> => {
   const { error } = await supabase
     .from('usuario')
@@ -113,11 +96,7 @@ export const deletarUsuario = async (usuarioId: string): Promise<void> => {
   }
 };
 
-/**
- * Alterna status ativo/inativo do usuário
- */
 export const alternarStatusUsuario = async (usuarioId: string): Promise<void> => {
-  // Primeiro buscar o status atual
   const { data: currentUser, error: fetchError } = await supabase
     .from('usuario')
     .select('ativo')
@@ -128,7 +107,6 @@ export const alternarStatusUsuario = async (usuarioId: string): Promise<void> =>
     throw new Error(`Erro ao buscar usuário: ${fetchError.message}`);
   }
 
-  // Alternar o status
   const { error } = await supabase
     .from('usuario')
     .update({ ativo: !currentUser.ativo })

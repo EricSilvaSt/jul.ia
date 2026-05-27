@@ -32,7 +32,7 @@ const CommitmentsPage: React.FC = () => {
         // Carregar profissionais
         const professionalData = await buscarProfissionais(user.clinicId);
         setProfessionals(professionalData.map(d => ({
-          id: d.dentista_id,
+          id: d.colaborador_id,
           name: d.nome,
           email: d.usuario?.email || '',
           phoneNumber: '',
@@ -46,17 +46,17 @@ const CommitmentsPage: React.FC = () => {
         })));
         
         // Carregar compromissos
-        const filtros = permissions.dentistId 
-          ? { dentista_id: permissions.dentistId }
+        const filtros = permissions.dentistId
+          ? { colaborador_id: permissions.dentistId }
           : {};
-          
+
         const appointmentData = await buscarAgendamentos(filtros);
         setAppointments(appointmentData.map(a => ({
           id: a.id?.toString() || '',
           patientName: a.nome_consulta || 'Cliente não informado',
           patientEmail: '',
           patientPhone: '',
-          professionalId: a.dentista_id || '',
+          professionalId: a.colaborador_id || '',
           data_agendamento: a.data_agendamento || '',
           fim_agendamento: a.fim_agendamento || '',
           status: a.status || 'pendente',

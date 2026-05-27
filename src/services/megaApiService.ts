@@ -1,10 +1,5 @@
-/**
- * Serviço para integração com a Mega-API
- * Instância: julia-teste
- */
-
 const MEGA_API_CONFIG = {
-  instanceId: 'julia-teste',
+  instanceId: 'lia-agenda',
   controlId: 'ec0e6a46-c717-4494-9a21-3f7a6433a8a3',
   instanceKey: 'megastart-MZYsnBG1aVs',
   token: 'MZYsnBG1aVs',

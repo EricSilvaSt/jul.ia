@@ -145,7 +145,7 @@ const SettingsPage: React.FC = () => {
       if (selectedUser) {
         await atualizarUsuario(selectedUser.usuario_id, userData);
       } else {
-        await criarUsuario({ ...userData, clinica_id: user.clinicId });
+        await criarUsuario({ ...userData, empresa_id: user.clinicId });
       }
       await loadUsers();
       setIsUserModalOpen(false);
@@ -300,8 +300,8 @@ const SettingsPage: React.FC = () => {
                   </label>
                   <input
                     type="tel"
-                    name="telefone_julia"
-                    value={displayClinic.telefone_julia || 'Não configurado'}
+                    name="telefone_lia"
+                    value={displayClinic.telefone_lia || 'Não configurado'}
                     readOnly
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 bg-gray-50"
                   />

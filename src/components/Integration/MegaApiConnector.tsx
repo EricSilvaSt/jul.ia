@@ -58,7 +58,7 @@ const MegaApiConnector: React.FC = () => {
           Mega-API WhatsApp Integration
         </h2>
         <p className="text-sm text-green-100">
-          Instância: julia-teste
+          Instância: lia-agenda
         </p>
       </div>
 
@@ -119,7 +119,7 @@ const MegaApiConnector: React.FC = () => {
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-gray-500">Instância:</span>
-              <div className="font-mono">julia-teste</div>
+              <div className="font-mono">lia-agenda</div>
             </div>
             <div>
               <span className="text-gray-500">ID Controle:</span>

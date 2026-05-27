@@ -86,8 +86,8 @@ export const authenticateUser = async (credentials: LoginCredentials): Promise<A
       senha,
       tipo_usuario,
       ativo,
-      clinica_id,
-      dentista_id
+      empresa_id,
+      colaborador_id
     `)
     .or(`login.eq.${identifier},email.eq.${identifier}`)
     .eq('ativo', true);
@@ -122,8 +122,8 @@ export const authenticateUser = async (credentials: LoginCredentials): Promise<A
     name: userData.nome,
     email: userData.email,
     role: normalizeTipoUsuario(userData.tipo_usuario),
-    clinicId: userData.clinica_id,
-    professionalId: userData.dentista_id,
+    clinicId: userData.empresa_id,
+    professionalId: userData.colaborador_id,
     isActive: userData.ativo,
   };
 };
@@ -138,9 +138,9 @@ export const getClinicInfo = async (clinicId: string): Promise<ClinicInfo> => {
 
   try {
     const { data: clinicData, error: clinicError } = await supabase
-      .from('clinica')
+      .from('empresas')
       .select(`
-        clinica_id,
+        empresa_id,
         nome_fantasia,
         email,
         telefone_contato,
@@ -156,7 +156,7 @@ export const getClinicInfo = async (clinicId: string): Promise<ClinicInfo> => {
         cep,
         convenios
       `)
-      .eq('clinica_id', clinicId)
+      .eq('empresa_id', clinicId)
       .maybeSingle();
 
     if (clinicError || !clinicData) {
@@ -170,7 +170,7 @@ export const getClinicInfo = async (clinicId: string): Promise<ClinicInfo> => {
       .maybeSingle();
 
     return {
-      id: clinicData.clinica_id,
+      id: clinicData.empresa_id,
       nome_fantasia: clinicData.nome_fantasia,
       email: clinicData.email,
       telefone_contato: clinicData.telefone_contato,

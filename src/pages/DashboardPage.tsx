@@ -33,7 +33,7 @@ const DashboardPage: React.FC = () => {
         if (permissions.canViewAllProfessionals) {
           const dentistData = await buscarProfissionais(user.clinicId);
           setDentists(dentistData.map(d => ({
-            id: d.dentista_id,
+            id: d.colaborador_id,
             name: d.nome,
             email: d.email || '',
             phoneNumber: '',
@@ -46,17 +46,17 @@ const DashboardPage: React.FC = () => {
         }
         
         // Carregar agendamentos
-        const filtros = permissions.dentistId 
-          ? { dentista_id: permissions.dentistId }
+        const filtros = permissions.dentistId
+          ? { colaborador_id: permissions.dentistId }
           : {};
-          
+
         const appointmentData = await buscarAgendamentos(filtros);
         setAppointments(appointmentData.map(a => ({
           id: a.id?.toString() || '',
           patientName: a.nome_consulta || 'Cliente não informado',
           patientEmail: '',
           patientPhone: '',
-          professionalId: a.dentista_id || '',
+          professionalId: a.colaborador_id || '',
           data_agendamento: a.data_agendamento || '',
           fim_agendamento: a.fim_agendamento || '',
           status: a.status || 'pendente',
@@ -230,7 +230,7 @@ const DashboardPage: React.FC = () => {
                         Duração: {appointment.duracao_minutos} min
                       </div>
                       <div className="text-sm text-gray-400">
-                        {appointment.origem === 'app' ? 'Sistema' : 'Júl.IA'}
+                        {appointment.origem === 'app' ? 'Sistema' : 'Lia'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

@@ -1,11 +1,11 @@
 import { supabase } from '../lib/supabase';
 
 export interface ClinicaCompleta {
-  clinica_id: string;
+  empresa_id: string;
   nome_fantasia: string;
   email: string;
   telefone_contato: string;
-  telefone_julia?: string;
+  telefone_lia?: string;
   cnpj?: string;
   razao_social?: string;
   endereco?: string;
@@ -18,21 +18,15 @@ export interface ClinicaCompleta {
   convenios?: any;
 }
 
-/**
- * Busca informações completas da clínica
- */
 export const buscarClinicaCompleta = async (clinicaId: string): Promise<ClinicaCompleta> => {
-  console.log('🏥 DEBUG - buscarClinicaCompleta iniciado');
-  console.log('  - clinicaId:', clinicaId);
-  
   const { data, error } = await supabase
-    .from('clinica')
+    .from('empresas')
     .select(`
-      clinica_id,
+      empresa_id,
       nome_fantasia,
       email,
       telefone_contato,
-      telefone_julia,
+      telefone_lia,
       cnpj,
       razao_social,
       endereco,
@@ -44,33 +38,26 @@ export const buscarClinicaCompleta = async (clinicaId: string): Promise<ClinicaC
       cep,
       convenios
     `)
-    .eq('clinica_id', clinicaId)
+    .eq('empresa_id', clinicaId)
     .maybeSingle();
 
-  console.log('🏥 DEBUG - Resultado da query:', { data, error });
-  
   if (error || !data) {
-    console.error('❌ DEBUG - Erro ao buscar clínica:', error);
-    throw new Error(`Erro ao buscar informações da clínica: ${error?.message || 'Clínica não encontrada'}`);
+    throw new Error(`Erro ao buscar informações da organização: ${error?.message || 'Não encontrada'}`);
   }
 
-  console.log('✅ DEBUG - Clínica encontrada:', data.nome_fantasia);
   return data;
 };
 
-/**
- * Atualiza informações da clínica
- */
 export const atualizarClinica = async (
-  clinicaId: string, 
-  updates: Partial<Omit<ClinicaCompleta, 'clinica_id' | 'plano'>>
+  clinicaId: string,
+  updates: Partial<Omit<ClinicaCompleta, 'empresa_id' | 'plano'>>
 ): Promise<void> => {
   const { error } = await supabase
-    .from('clinica')
+    .from('empresas')
     .update(updates)
-    .eq('clinica_id', clinicaId);
+    .eq('empresa_id', clinicaId);
 
   if (error) {
-    throw new Error(`Erro ao atualizar clínica: ${error.message}`);
+    throw new Error(`Erro ao atualizar organização: ${error.message}`);
   }
 };

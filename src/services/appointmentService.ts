@@ -6,15 +6,15 @@ export interface AgendamentoData {
   usuario_id?: string;
   paciente_id?: string;
   especialidade?: number;
-  dentista_id: string;
+  colaborador_id: string;
   nome_consulta: string;
-  data_agendamento: string; // UTC ISO string
-  fim_agendamento: string; // UTC ISO string
+  data_agendamento: string;
+  fim_agendamento: string;
   status: 'pendente' | 'confirmado' | 'cancelado' | 'falta' | 'concluido';
   motivo_cancelamento?: string;
   observacoes?: string;
   duracao_minutos: number;
-  origem: 'app' | 'julia';
+  origem: 'app' | 'lia';
 }
 
 export interface MarcarAgendamentoParams {
@@ -22,10 +22,10 @@ export interface MarcarAgendamentoParams {
   p_dentista: string;
   p_paciente: string;
   p_especialidade: number;
-  p_inicio: string; // ISO string com timezone
+  p_inicio: string;
   p_duracao: number;
   p_nome_consulta: string;
-  p_origem: 'app' | 'julia';
+  p_origem: 'app' | 'lia';
 }
 
 export interface MarcarAgendamentoResponse {
@@ -34,12 +34,8 @@ export interface MarcarAgendamentoResponse {
   mensagem?: string;
 }
 
-/**
- * Marca um agendamento usando a função RPC
- */
 export const marcarAgendamento = async (params: MarcarAgendamentoParams): Promise<MarcarAgendamentoResponse> => {
-  const { data, error } = await supabase
-    .rpc('marcar_agendamento', params);
+  const { data, error } = await supabase.rpc('marcar_agendamento', params);
 
   if (error) {
     throw new Error(`Erro ao marcar agendamento: ${error.message}`);
@@ -48,24 +44,21 @@ export const marcarAgendamento = async (params: MarcarAgendamentoParams): Promis
   return data;
 };
 
-/**
- * Busca agendamentos com filtros
- */
 export const buscarAgendamentos = async (filtros?: {
-  dentista_id?: string;
+  colaborador_id?: string;
   paciente_id?: string;
   data_inicio?: string;
   data_fim?: string;
   status?: string;
-  origem?: 'app' | 'julia';
+  origem?: 'app' | 'lia';
 }): Promise<AgendamentoData[]> => {
   let query = supabase
     .from('agendamento')
     .select('*')
     .order('data_agendamento', { ascending: true });
 
-  if (filtros?.dentista_id) {
-    query = query.eq('dentista_id', filtros.dentista_id);
+  if (filtros?.colaborador_id) {
+    query = query.eq('colaborador_id', filtros.colaborador_id);
   }
 
   if (filtros?.paciente_id) {
@@ -97,11 +90,8 @@ export const buscarAgendamentos = async (filtros?: {
   return data || [];
 };
 
-/**
- * Atualiza um agendamento existente
- */
 export const atualizarAgendamento = async (
-  id: number, 
+  id: number,
   updates: Partial<AgendamentoData>
 ): Promise<void> => {
   const { error } = await supabase
@@ -114,19 +104,10 @@ export const atualizarAgendamento = async (
   }
 };
 
-/**
- * Cancela um agendamento
- */
-export const cancelarAgendamento = async (
-  id: number, 
-  motivo: string
-): Promise<void> => {
+export const cancelarAgendamento = async (id: number, motivo: string): Promise<void> => {
   const { error } = await supabase
     .from('agendamento')
-    .update({
-      status: 'cancelado',
-      motivo_cancelamento: motivo
-    })
+    .update({ status: 'cancelado', motivo_cancelamento: motivo })
     .eq('id', id);
 
   if (error) {
@@ -134,9 +115,6 @@ export const cancelarAgendamento = async (
   }
 };
 
-/**
- * Deleta um agendamento (use apenas se necessário, prefira cancelar)
- */
 export const deletarAgendamento = async (id: number): Promise<void> => {
   const { error } = await supabase
     .from('agendamento')

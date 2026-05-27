@@ -10,7 +10,7 @@ interface Usuario {
   tipo_usuario: 'admin' | 'dentist';
   ativo: boolean;
   criado_em: string;
-  dentista_id?: string;
+  colaborador_id?: string;
   senha?: string;
 }
 
@@ -34,7 +34,7 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({
     email: undefined as string | undefined,
     tipo_usuario: 'dentist' as 'admin' | 'dentist',
     ativo: true,
-    dentista_id: undefined as string | undefined,
+    colaborador_id: undefined as string | undefined,
     senha: '',
   });
 
@@ -62,7 +62,7 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({
         email: user.email,
         tipo_usuario: user.tipo_usuario,
         ativo: user.ativo,
-        dentista_id: user.dentista_id,
+        colaborador_id: user.colaborador_id,
         senha: '',
       });
     } else {
@@ -71,7 +71,7 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({
         email: undefined,
         tipo_usuario: 'dentist',
         ativo: true,
-        dentista_id: undefined,
+        colaborador_id: undefined,
         senha: '',
       });
     }
@@ -89,7 +89,7 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({
       setFormData(prev => ({
         ...prev,
         tipo_usuario: value as 'admin' | 'dentist',
-        dentista_id: value === 'admin' ? undefined : prev.dentista_id,
+        colaborador_id: value === 'admin' ? undefined : prev.colaborador_id,
         email: value === 'dentist' ? undefined : prev.email,
       }));
     } else {
@@ -177,14 +177,14 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({
                 Vincular ao Profissional
               </label>
               <select
-                name="dentista_id"
-                value={formData.dentista_id || ''}
+                name="colaborador_id"
+                value={formData.colaborador_id || ''}
                 onChange={handleChange}
                 className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
               >
                 <option value="">Selecione um profissional</option>
                 {availableProfessionals.map((prof) => (
-                  <option key={prof.dentista_id} value={prof.dentista_id}>
+                  <option key={prof.colaborador_id} value={prof.colaborador_id}>
                     {prof.nome} {prof.cro ? `(${prof.cro})` : ''}
                   </option>
                 ))}

@@ -41,7 +41,7 @@ const ProfessionalsPage: React.FC = () => {
         console.log('DEBUG - Processando dados para o estado...');
         
         setProfessionals(data.map(d => ({
-          id: d.dentista_id,
+          id: d.colaborador_id,
           name: d.nome,
           email: d.email || 'Não informado',
           phoneNumber: d.telefone || 'Não informado',
@@ -51,9 +51,8 @@ const ProfessionalsPage: React.FC = () => {
           createdAt: d.criado_em,
           availability: d.disponibilidade || {},
         })));
-        
+
         console.log('DEBUG - Estado atualizado com', data.length, 'profissionais');
-        console.log('DEBUG - Profissionais processados:', data.map(d => ({ id: d.dentista_id, nome: d.nome, clinica_id: d.clinica_id })));
       } catch (error) {
         console.error('❌ DEBUG - Erro ao carregar profissionais:', error);
         console.error('❌ DEBUG - Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
@@ -137,7 +136,7 @@ const ProfessionalsPage: React.FC = () => {
           cro: professionalData.cro,
           ativo: professionalData.isActive,
           disponibilidade: professionalData.availability,
-          clinica_id: user.clinicId,
+          empresa_id: user.clinicId,
         });
       }
       
@@ -145,10 +144,9 @@ const ProfessionalsPage: React.FC = () => {
       // Recarregar lista
       const data = await buscarProfissionais(user.clinicId);
       console.log('DEBUG - Lista recarregada:', data.length, 'profissionais');
-      console.log('DEBUG - Dados recarregados:', data.map(d => ({ id: d.dentista_id, nome: d.nome })));
-      
+
       setProfessionals(data.map(d => ({
-        id: d.dentista_id,
+        id: d.colaborador_id,
         name: d.nome,
         email: d.email || 'Não informado',
         phoneNumber: d.telefone || 'Não informado',
@@ -183,7 +181,7 @@ const ProfessionalsPage: React.FC = () => {
       // Recarregar lista
       const data = await buscarProfissionais(user.clinicId!);
       setProfessionals(data.map(d => ({
-        id: d.dentista_id,
+        id: d.colaborador_id,
         name: d.nome,
         email: d.email || 'Não informado',
         phoneNumber: d.telefone || 'Não informado',
