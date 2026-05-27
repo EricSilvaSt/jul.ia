@@ -28,31 +28,30 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({
   onSave,
 }) => {
   const { user: currentUser } = useAuth();
-  const [availableDentists, setAvailableDentists] = useState<any[]>([]);
+  const [availableProfessionals, setAvailableProfessionals] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     nome: '',
-    email: undefined,
+    email: undefined as string | undefined,
     tipo_usuario: 'dentist' as 'admin' | 'dentist',
     ativo: true,
-    dentista_id: undefined,
+    dentista_id: undefined as string | undefined,
     senha: '',
   });
 
-  // Carregar dentistas disponíveis
   useEffect(() => {
-    const loadDentists = async () => {
+    const loadProfessionals = async () => {
       if (!currentUser?.clinicId || currentUser.clinicId === 'test-clinic-id') return;
-      
+
       try {
-        const dentistas = await buscarProfissionais(currentUser.clinicId);
-        setAvailableDentists(dentistas);
+        const profissionais = await buscarProfissionais(currentUser.clinicId);
+        setAvailableProfessionals(profissionais);
       } catch (error) {
-        console.error('Erro ao carregar dentistas:', error);
+        console.error('Erro ao carregar profissionais:', error);
       }
     };
 
     if (isOpen) {
-      loadDentists();
+      loadProfessionals();
     }
   }, [isOpen, currentUser?.clinicId]);
 
@@ -82,12 +81,19 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target;
-    
+
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData(prev => ({ ...prev, ativo: checked }));
+    } else if (name === 'tipo_usuario') {
+      setFormData(prev => ({
+        ...prev,
+        tipo_usuario: value as 'admin' | 'dentist',
+        dentista_id: value === 'admin' ? undefined : prev.dentista_id,
+        email: value === 'dentist' ? undefined : prev.email,
+      }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData(prev => ({ ...prev, [name]: value || undefined }));
     }
   };
 
@@ -128,42 +134,6 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({
             />
           </div>
 
-          {formData.tipo_usuario === 'admin' && (
-            <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email * (obrigatório para administradores)
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email || ''}
-              onChange={handleChange}
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-              required={formData.tipo_usuario === 'admin'}
-            />
-          </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Senha *
-            </label>
-            <input
-              type="password"
-              name="senha"
-              value={formData.senha || ''}
-              onChange={handleChange}
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-              required
-              placeholder={user ? 'Deixe em branco para manter a senha atual' : 'Digite a senha'}
-            />
-            {user && (
-              <p className="text-xs text-gray-500 mt-1">
-                Deixe em branco para manter a senha atual
-              </p>
-            )}
-          </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Tipo de Usuário *
@@ -176,14 +146,35 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({
               required
             >
               <option value="admin">Administrador</option>
-              <option value="dentist">Dentista</option>
+              <option value="dentist">Usuário</option>
             </select>
+            <p className="text-xs text-gray-500 mt-1">
+              {formData.tipo_usuario === 'admin'
+                ? 'Acesso completo ao sistema. Login com email + senha.'
+                : 'Acesso somente aos próprios compromissos. Login com identificador + senha.'}
+            </p>
           </div>
+
+          {formData.tipo_usuario === 'admin' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email * <span className="text-gray-400 font-normal">(obrigatório para administradores)</span>
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email || ''}
+                onChange={handleChange}
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                required={formData.tipo_usuario === 'admin'}
+              />
+            </div>
+          )}
 
           {formData.tipo_usuario === 'dentist' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Vincular ao Dentista
+                Vincular ao Profissional
               </label>
               <select
                 name="dentista_id"
@@ -191,19 +182,38 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({
                 onChange={handleChange}
                 className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
               >
-                <option value="">Selecione um dentista</option>
-                {availableDentists.map((dentista) => (
-                  <option key={dentista.dentista_id} value={dentista.dentista_id}>
-                    Dr. {dentista.nome} ({dentista.cro})
+                <option value="">Selecione um profissional</option>
+                {availableProfessionals.map((prof) => (
+                  <option key={prof.dentista_id} value={prof.dentista_id}>
+                    {prof.nome} {prof.cro ? `(${prof.cro})` : ''}
                   </option>
                 ))}
               </select>
               <p className="text-xs text-gray-500 mt-1">
-                Apenas usuários do tipo dentista podem ser vinculados a um dentista cadastrado.
-                O login será feito usando o CRO do dentista + senha.
+                O usuário terá acesso apenas aos compromissos do profissional vinculado.
               </p>
             </div>
           )}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Senha *
+            </label>
+            <input
+              type="password"
+              name="senha"
+              value={formData.senha || ''}
+              onChange={handleChange}
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+              required={!user}
+              placeholder={user ? 'Deixe em branco para manter a senha atual' : 'Digite a senha'}
+            />
+            {user && (
+              <p className="text-xs text-gray-500 mt-1">
+                Deixe em branco para manter a senha atual
+              </p>
+            )}
+          </div>
 
           <div className="flex items-center">
             <input
@@ -216,14 +226,6 @@ const UserManagementModal: React.FC<UserManagementModalProps> = ({
             <label className="ml-2 block text-sm text-gray-700">
               Usuário ativo
             </label>
-          </div>
-
-          <div className="bg-blue-50 p-4 rounded-md">
-            <h4 className="text-sm font-medium text-blue-900 mb-2">Permissões por Tipo de Usuário:</h4>
-            <ul className="text-xs text-blue-800 space-y-1">
-              <li><strong>Administrador:</strong> Login com email + senha. Acesso completo ao sistema.</li>
-              <li><strong>Dentista:</strong> Login com CRO + senha. Acesso limitado à própria agenda.</li>
-            </ul>
           </div>
 
           <div className="flex justify-end space-x-3 pt-4 border-t">

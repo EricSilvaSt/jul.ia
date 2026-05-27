@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Appointment, Dentist } from '../../types';
 import { convertToUTC, convertFromUTC, calculateEndTime } from '../../utils/timezone';
 import { marcarAgendamento } from '../../services/appointmentService';
+import { buscarAreasAtuacao } from '../../services/professionalService';
 
 interface AppointmentModalProps {
   isOpen: boolean;
@@ -13,19 +14,6 @@ interface AppointmentModalProps {
   appointment?: Appointment;
 }
 
-const procedures = [
-  'Reunião',
-  'Consulta',
-  'Atendimento',
-  'Avaliação',
-  'Acompanhamento',
-  'Procedimento',
-  'Sessão',
-  'Workshop',
-  'Treinamento',
-  'Auditoria',
-];
-
 const AppointmentModal: React.FC<AppointmentModalProps> = ({
   isOpen,
   onClose,
@@ -35,7 +23,14 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
   appointment,
 }) => {
   const formattedDate = date.toISOString().split('T')[0];
-  
+  const [especialidades, setEspecialidades] = useState<Array<{id_especialidade: number, nome_especialidade: string}>>([]);
+
+  useEffect(() => {
+    if (isOpen) {
+      buscarAreasAtuacao().then(setEspecialidades).catch(console.error);
+    }
+  }, [isOpen]);
+
   const [formData, setFormData] = useState<Omit<Appointment, 'id'>>({
     patientName: appointment?.patientName || '',
     patientEmail: appointment?.patientEmail || '',
@@ -239,7 +234,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tipo de Atendimento
+              Assunto
             </label>
             <select
               name="procedure"
@@ -248,10 +243,10 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
               required
             >
-              <option value="">Selecione um tipo</option>
-              {procedures.map((procedure) => (
-                <option key={procedure} value={procedure}>
-                  {procedure}
+              <option value="">Selecione um assunto</option>
+              {especialidades.map((esp) => (
+                <option key={esp.id_especialidade} value={esp.nome_especialidade}>
+                  {esp.nome_especialidade}
                 </option>
               ))}
             </select>
@@ -311,7 +306,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
               Observações
             </label>
             <textarea
-              name="observacoes"
+              name="notes"
               value={formData.notes || ''}
               onChange={handleChange}
               rows={3}

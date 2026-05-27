@@ -29,7 +29,6 @@ const ProfessionalCard: React.FC<ProfessionalCardProps> = ({
             </div>
             <div>
               <h3 className="font-semibold text-lg">{dentist.name}</h3>
-              <p className="text-sm text-gray-600">{dentist.specialization}</p>
             </div>
           </div>
           <div className="flex items-center space-x-1">

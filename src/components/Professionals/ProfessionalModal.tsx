@@ -1,18 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2 } from 'lucide-react';
 import { Dentist } from '../../types';
-import { buscarAreasAtuacao } from '../../services/professionalService';
 
 interface ProfessionalModalProps {
   isOpen: boolean;
   onClose: () => void;
   dentist?: Dentist | null;
   onSave: (dentist: Omit<Dentist, 'id' | 'createdAt'>) => void;
-}
-
-interface AreaAtuacao {
-  id_especialidade: number;
-  nome_especialidade: string;
 }
 
 const weekDays = [
@@ -31,7 +25,6 @@ const ProfessionalModal: React.FC<ProfessionalModalProps> = ({
   dentist,
   onSave,
 }) => {
-  const [areasAtuacao, setAreasAtuacao] = useState<AreaAtuacao[]>([]);
   const [formData, setFormData] = useState<Omit<Dentist, 'id' | 'createdAt'>>({
     name: '',
     email: '',
@@ -41,65 +34,6 @@ const ProfessionalModal: React.FC<ProfessionalModalProps> = ({
     isActive: true,
     availability: {},
   });
-
-  // Carregar áreas de atuação
-  useEffect(() => {
-    const loadAreasAtuacao = async () => {
-      console.log('DEBUG - Modal: loadAreasAtuacao INICIADO');
-      console.log('DEBUG - Modal: isOpen =', isOpen);
-
-      try {
-        console.log('DEBUG - Modal: Chamando buscarAreasAtuacao...');
-        const data = await buscarAreasAtuacao();
-        console.log('DEBUG - Modal: Dados retornados:', data);
-        console.log('DEBUG - Modal: Quantidade:', data?.length);
-
-        if (data && data.length > 0) {
-          console.log('DEBUG - Modal: Setando áreas de atuação no estado');
-          setAreasAtuacao(data);
-        } else {
-          console.log('DEBUG - Modal: Dados vazios, usando fallback');
-          setAreasAtuacao([
-            { id_especialidade: 1, nome_especialidade: 'Consultoria' },
-            { id_especialidade: 2, nome_especialidade: 'Assessoria' },
-            { id_especialidade: 3, nome_especialidade: 'Terapia' },
-            { id_especialidade: 4, nome_especialidade: 'Educação' },
-            { id_especialidade: 5, nome_especialidade: 'Tecnologia' },
-            { id_especialidade: 6, nome_especialidade: 'Administração' },
-            { id_especialidade: 7, nome_especialidade: 'Saúde' },
-            { id_especialidade: 8, nome_especialidade: 'Jurídico' },
-            { id_especialidade: 9, nome_especialidade: 'Marketing' },
-            { id_especialidade: 10, nome_especialidade: 'Recursos Humanos' },
-          ]);
-        }
-
-      } catch (error) {
-        console.error('❌ DEBUG - Modal: Erro ao carregar áreas de atuação:', error);
-        console.log('DEBUG - Modal: Usando fallback devido ao erro');
-        setAreasAtuacao([
-          { id_especialidade: 1, nome_especialidade: 'Consultoria' },
-          { id_especialidade: 2, nome_especialidade: 'Assessoria' },
-          { id_especialidade: 3, nome_especialidade: 'Terapia' },
-          { id_especialidade: 4, nome_especialidade: 'Educação' },
-          { id_especialidade: 5, nome_especialidade: 'Tecnologia' },
-          { id_especialidade: 6, nome_especialidade: 'Administração' },
-          { id_especialidade: 7, nome_especialidade: 'Saúde' },
-          { id_especialidade: 8, nome_especialidade: 'Jurídico' },
-          { id_especialidade: 9, nome_especialidade: 'Marketing' },
-          { id_especialidade: 10, nome_especialidade: 'Recursos Humanos' },
-        ]);
-      }
-
-      console.log('DEBUG - Modal: loadAreasAtuacao FINALIZADO');
-    };
-
-    if (isOpen) {
-      console.log('DEBUG - Modal: Modal está aberto, iniciando carregamento...');
-      loadAreasAtuacao();
-    } else {
-      console.log('DEBUG - Modal: Modal fechado, não carregando áreas de atuação');
-    }
-  }, [isOpen]);
 
   useEffect(() => {
     if (dentist) {
@@ -179,7 +113,6 @@ const ProfessionalModal: React.FC<ProfessionalModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('DEBUG - Salvando profissional:', formData);
     onSave(formData);
   };
 
@@ -260,29 +193,6 @@ const ProfessionalModal: React.FC<ProfessionalModalProps> = ({
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
                   required
                 />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Área de Atuação *
-                </label>
-                <select
-                  name="specialization"
-                  value={formData.specialization}
-                  onChange={handleChange}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                  required
-                >
-                  <option value="">Selecione uma área de atuação</option>
-                  {areasAtuacao.map((area) => (
-                    <option key={area.id_especialidade} value={area.nome_especialidade}>
-                      {area.nome_especialidade}
-                    </option>
-                  ))}
-                </select>
-                <div className="mt-1 text-xs text-gray-500">
-                  DEBUG: {areasAtuacao.length} áreas de atuação carregadas
-                </div>
               </div>
 
               <div className="flex items-center">

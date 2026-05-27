@@ -58,7 +58,7 @@ const EvolutionApiConnector: React.FC = () => {
           Evolution API WhatsApp Integration
         </h2>
         <p className="text-sm text-green-100">
-          Instância: lia-agenda
+          Instância: vendas
         </p>
       </div>
 
@@ -119,7 +119,7 @@ const EvolutionApiConnector: React.FC = () => {
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-gray-500">Instância:</span>
-              <div className="font-mono">lia-agenda</div>
+              <div className="font-mono">vendas</div>
             </div>
             <div>
               <span className="text-gray-500">API Version:</span>

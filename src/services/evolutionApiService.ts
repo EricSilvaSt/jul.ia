@@ -4,9 +4,10 @@
  */
 
 const EVOLUTION_API_CONFIG = {
-  instanceId: 'lia-agenda',
-  baseUrl: import.meta.env.VITE_EVOLUTION_API_URL || 'https://api.evolution-api.com',
-  apiKey: import.meta.env.VITE_EVOLUTION_API_KEY || '',
+  instanceId: import.meta.env.VITE_EVOLUTION_INSTANCE || 'vendas',
+  baseUrl: import.meta.env.VITE_EVOLUTION_API_URL || 'https://evoapi.julia.app.br',
+  apiKey: import.meta.env.VITE_EVOLUTION_API_KEY || '2E3642CE66FF-43FA-BB7E-0CB89294099F',
+  phoneNumber: import.meta.env.VITE_EVOLUTION_PHONE || '557196293388',
 };
 
 interface EvolutionApiResponse<T = any> {
