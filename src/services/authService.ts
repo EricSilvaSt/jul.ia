@@ -1,8 +1,8 @@
-import { supabase, supabaseAdmin } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 import bcrypt from 'bcryptjs';
 
 export interface LoginCredentials {
-  identifier: string; // email para admin, ID de registro para profissional, login para clínica
+  identifier: string;
   password: string;
 }
 
@@ -44,17 +44,24 @@ export interface ClinicInfo {
   };
 }
 
+// Normaliza o tipo_usuario para os valores esperados pelo sistema
+const normalizeTipoUsuario = (tipo: string): 'admin' | 'professional' | 'clinic' => {
+  const t = (tipo || '').toLowerCase();
+  if (t === 'admin' || t === 'adm' || t === 'administrador') return 'admin';
+  if (t === 'dentist' || t === 'dentista' || t === 'professional' || t === 'profissional') return 'professional';
+  if (t === 'clinic' || t === 'clinica' || t === 'clínica') return 'clinic';
+  // Fallback: se tiver email, trata como admin
+  return 'admin';
+};
+
 /**
  * Autentica usuário
  */
 export const authenticateUser = async (credentials: LoginCredentials): Promise<AuthUser> => {
   const { identifier, password } = credentials;
 
-  // Verificar se o Supabase está configurado
+  // Modo demo quando Supabase não está configurado
   if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-    console.warn('⚠️ Supabase não configurado, usando modo demo');
-    
-    // Modo demo - permitir login com credenciais específicas
     if (identifier === 'demo@clinica.com' && password === 'demo123') {
       return {
         id: 'demo-user-id',
@@ -64,150 +71,72 @@ export const authenticateUser = async (credentials: LoginCredentials): Promise<A
         clinicId: 'demo-clinic-id',
         isActive: true,
       };
-    } else {
-      throw new Error('Modo demo: Use demo@clinica.com / demo123');
     }
+    throw new Error('Modo demo: Use demo@clinica.com / demo123');
   }
 
-  console.log('Attempting authentication for identifier:', identifier);
+  // Busca pelo campo login OU email (usando anon key — sem RLS block)
+  const { data: users, error } = await supabase
+    .from('usuario')
+    .select(`
+      usuario_id,
+      nome,
+      email,
+      login,
+      senha,
+      tipo_usuario,
+      ativo,
+      clinica_id,
+      dentista_id
+    `)
+    .or(`login.eq.${identifier},email.eq.${identifier}`)
+    .eq('ativo', true);
 
-  // Primeiro, tentar autenticação com Supabase Auth se o identifier for um email
-  if (identifier.includes('@')) {
-    try {
-      console.log('DEBUG: Attempting Supabase Auth login with email:', identifier);
-      
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: identifier,
-        password: password,
-      });
-
-      if (authError) {
-        console.log('DEBUG: Supabase Auth failed:', authError.message);
-        // Fallback para autenticação customizada
-      } else if (authData.user) {
-        console.log('DEBUG: Supabase Auth successful, fetching user data...');
-        
-        // Buscar dados do usuário na tabela customizada
-        const { data: userData, error: userError } = await supabase
-          .from('usuario')
-          .select(`
-            usuario_id,
-            nome,
-            email,
-            login,
-            tipo_usuario,
-            ativo,
-            clinica_id,
-            dentista_id
-          `)
-          .eq('email', identifier)
-          .eq('ativo', true)
-          .single();
-
-        if (!userError && userData) {
-          console.log('DEBUG: User data found via Supabase Auth');
-          return {
-            id: userData.usuario_id,
-            name: userData.nome,
-            email: userData.email,
-            role: userData.tipo_usuario as 'admin' | 'professional' | 'clinic',
-            clinicId: userData.clinica_id,
-            professionalId: userData.dentista_id,
-            isActive: userData.ativo,
-          };
-        }
-      }
-    } catch (error) {
-      console.log('DEBUG: Supabase Auth error, falling back to custom auth:', error);
-    }
+  if (error) {
+    console.error('Erro ao buscar usuário:', error);
+    throw new Error('Erro ao verificar credenciais. Tente novamente.');
   }
 
-  // Fallback para autenticação customizada
-  try {
-    // Buscar usuário apenas pelo campo login
-    console.log('DEBUG: Searching user by login field:', identifier);
-    
-    const { data: userData, error: userError } = await supabaseAdmin
-      .from('usuario')
-      .select(`
-        usuario_id,
-        nome,
-        email,
-        login,
-        senha,
-        tipo_usuario,
-        ativo,
-        clinica_id,
-        dentista_id,
-        dentistas (
-          nome,
-          cro
-        )
-      `)
-      .eq('login', identifier)
-      .eq('ativo', true)
-      .single();
-
-    if (userError || !userData) {
-      console.log('No user found with login:', identifier);
-      throw new Error('Credenciais inválidas');
-    }
-
-    console.log('User found:', userData.nome, 'Comparing password...');
-    console.log('DEBUG: User password hash from DB:', userData.senha);
-    
-    // Verificar se a senha está hasheada (bcrypt) ou é texto plano
-    let isPasswordValid = false;
-    if (userData.senha.startsWith('$2a$') || userData.senha.startsWith('$2b$')) {
-      // Senha hasheada com bcrypt
-      isPasswordValid = await verifyPassword(password, userData.senha);
-      console.log('DEBUG: Using bcrypt verification');
-    } else {
-      // Senha em texto plano (comparação direta)
-      isPasswordValid = password === userData.senha;
-      console.log('DEBUG: Using plain text verification');
-    }
-    
-    console.log('DEBUG: isPasswordValid:', isPasswordValid);
-    
-    if (!isPasswordValid) {
-      console.log('Password mismatch for user:', userData.nome);
-      throw new Error('Credenciais inválidas');
-    }
-
-    console.log('DEBUG: Password valid, returning user');
-    return {
-      id: userData.usuario_id,
-      name: userData.nome,
-      email: userData.email,
-      role: userData.tipo_usuario as 'admin' | 'professional' | 'clinic',
-      clinicId: userData.clinica_id,
-      professionalId: userData.dentista_id,
-      isActive: userData.ativo,
-    };
-
-  } catch (error) {
-    console.error('Error during authentication process:', error);
-    throw new Error('Credenciais inválidas');
+  if (!users || users.length === 0) {
+    throw new Error('Usuário não encontrado ou inativo.');
   }
+
+  const userData = users[0];
+
+  // Verificar senha — suporta bcrypt e texto plano
+  let senhaValida = false;
+  const senha = userData.senha || '';
+
+  if (senha.startsWith('$2a$') || senha.startsWith('$2b$') || senha.startsWith('$2y$')) {
+    senhaValida = await bcrypt.compare(password, senha);
+  } else {
+    senhaValida = password === senha;
+  }
+
+  if (!senhaValida) {
+    throw new Error('Senha incorreta.');
+  }
+
+  return {
+    id: userData.usuario_id,
+    name: userData.nome,
+    email: userData.email,
+    role: normalizeTipoUsuario(userData.tipo_usuario),
+    clinicId: userData.clinica_id,
+    professionalId: userData.dentista_id,
+    isActive: userData.ativo,
+  };
 };
 
 /**
- * Busca informações da clínica
+ * Busca informações da clínica/organização
  */
 export const getClinicInfo = async (clinicId: string): Promise<ClinicInfo> => {
-  console.log('DEBUG: getClinicInfo called with clinicId:', clinicId);
-  
-  // Se for modo demo, retornar dados de teste
   if (clinicId === 'demo-clinic-id' || !import.meta.env.VITE_SUPABASE_URL) {
-    console.log('DEBUG: Returning demo clinic data');
     return createTestClinicData(clinicId);
   }
-  
+
   try {
-    console.log('DEBUG: Executing clinic query...');
-    
-    // Primeiro buscar dados básicos da clínica
     const { data: clinicData, error: clinicError } = await supabase
       .from('clinica')
       .select(`
@@ -230,110 +159,67 @@ export const getClinicInfo = async (clinicId: string): Promise<ClinicInfo> => {
       .eq('clinica_id', clinicId)
       .maybeSingle();
 
-    console.log('DEBUG: Clinic query result:', { clinicData, clinicError });
-
-    if (clinicError) {
-      console.error('DEBUG: Error fetching clinic:', clinicError);
-      console.log('DEBUG: Falling back to test clinic data');
-      // Fallback para dados de teste quando há erro na consulta
+    if (clinicError || !clinicData) {
       return createTestClinicData(clinicId);
     }
 
-    if (clinicData) {
-      console.log('DEBUG: Clinic data found, processing...');
-      
-      // Buscar dados do plano separadamente
-      const { data: planoData, error: planoError } = await supabase
-        .from('planos')
-        .select('*')
-        .eq('id', clinicData.plano_id || 1)
-        .maybeSingle();
-      
-      console.log('DEBUG: Plano query result:', { planoData, planoError });
-      
-      return {
-        id: clinicData.clinica_id,
-        nome_fantasia: clinicData.nome_fantasia,
-        email: clinicData.email,
-        telefone_contato: clinicData.telefone_contato,
-        telefone_lia: clinicData.telefone_lia,
-        cnpj: clinicData.cnpj,
-        razao_social: clinicData.razao_social,
-        endereco: clinicData.endereco,
-        numero: clinicData.numero,
-        complemento: clinicData.complemento,
-        bairro: clinicData.bairro,
-        cidade: clinicData.cidade,
-        estado: clinicData.estado,
-        cep: clinicData.cep,
-        convenios: clinicData.convenios,
-        plano: planoData || {
-          id: 1,
-          nome: 'Básico',
-          descricao: 'Plano básico',
-          preco_mensal: 99.90,
-          preco_anual: 999.00,
-          max_dentistas: 5,
-          max_agendamentos_mes: 100,
-          recursos: {
-            relatorios_avancados: false,
-            integracao_whatsapp: true,
-            backup_automatico: true
-          }
-        },
-      };
-    }
-    
-    console.log('DEBUG: No clinic data found, using test data');
-    // Fallback para dados de teste quando não encontra a clínica
-    return createTestClinicData(clinicId);
-  } catch (error) {
-    console.error('DEBUG: Exception in getClinicInfo:', error);
-    console.log('DEBUG: Exception occurred, falling back to test data');
-    // Fallback para dados de teste em caso de exceção
+    const { data: planoData } = await supabase
+      .from('planos')
+      .select('*')
+      .eq('id', 1)
+      .maybeSingle();
+
+    return {
+      id: clinicData.clinica_id,
+      nome_fantasia: clinicData.nome_fantasia,
+      email: clinicData.email,
+      telefone_contato: clinicData.telefone_contato,
+      telefone_lia: clinicData.telefone_lia,
+      cnpj: clinicData.cnpj,
+      razao_social: clinicData.razao_social,
+      endereco: clinicData.endereco,
+      numero: clinicData.numero,
+      complemento: clinicData.complemento,
+      bairro: clinicData.bairro,
+      cidade: clinicData.cidade,
+      estado: clinicData.estado,
+      cep: clinicData.cep,
+      convenios: clinicData.convenios,
+      plano: planoData || defaultPlano(),
+    };
+  } catch {
     return createTestClinicData(clinicId);
   }
 };
 
-/**
- * Cria dados de teste para clínica quando não encontrada no banco
- */
-const createTestClinicData = (clinicId: string): ClinicInfo => {
-  return {
-    id: clinicId,
-    nome_fantasia: 'Redeorto Salvador',
-    email: 'redeortosalvador@gmail.com',
-    telefone_contato: '(71) 3328-3229',
-    telefone_julia: '553182174888@s.whatsapp.net',
-    cnpj: '12.345.678/0001-90',
-    razao_social: 'Redeorto Salvador Ltda.',
-    endereco: 'Av. Sete de Setembro',
-    numero: '906',
-    complemento: '1º andar – Dois de Julho',
-    bairro: 'Dois de Julho',
-    cidade: 'Salvador',
-    estado: 'BA',
-    cep: '40050-000',
-    convenios: [],
-    plano: {
-      id: 1,
-      nome: 'Básico',
-      descricao: 'Plano básico',
-      preco_mensal: 99.90,
-      preco_anual: 999.00,
-      max_dentistas: 5,
-      max_agendamentos_mes: 100,
-      recursos: {
-        relatorios_avancados: false,
-        integracao_whatsapp: true,
-        backup_automatico: true
-      }
-    }
-  };
-};
-/**
- * Determina permissões do usuário baseado no seu tipo e dados
- */
+const defaultPlano = () => ({
+  id: 1,
+  nome: 'Básico',
+  descricao: 'Plano básico',
+  preco_mensal: 99.90,
+  preco_anual: 999.00,
+  max_dentistas: 5,
+  max_agendamentos_mes: 100,
+  recursos: {
+    relatorios_avancados: false,
+    integracao_whatsapp: true,
+    backup_automatico: true,
+  },
+});
+
+const createTestClinicData = (clinicId: string): ClinicInfo => ({
+  id: clinicId,
+  nome_fantasia: 'ER.IA Tech',
+  email: 'techeria3@gmail.com',
+  telefone_contato: '(71) 96293-3388',
+  cnpj: '',
+  razao_social: 'ER.IA Tech',
+  cidade: 'Salvador',
+  estado: 'BA',
+  convenios: [],
+  plano: defaultPlano(),
+});
+
 export const getUserPermissions = (user: AuthUser) => {
   const permissions = {
     canViewAllAppointments: false,
@@ -345,17 +231,11 @@ export const getUserPermissions = (user: AuthUser) => {
   switch (user.role) {
     case 'admin':
     case 'clinic':
-      // Administradores e clínicas veem tudo da sua clínica
       permissions.canViewAllAppointments = true;
       permissions.canViewAllProfessionals = true;
       permissions.canManageUsers = true;
       break;
-
     case 'professional':
-      // Profissionais só veem sua própria agenda
-      permissions.canViewAllAppointments = false;
-      permissions.canViewAllProfessionals = false;
-      permissions.canManageUsers = false;
       permissions.professionalId = user.professionalId;
       break;
   }
@@ -363,36 +243,20 @@ export const getUserPermissions = (user: AuthUser) => {
   return permissions;
 };
 
-/**
- * Verifica se a clínica tem acesso a uma funcionalidade baseada no plano
- */
 export const hasFeatureAccess = (plano: any, feature: string): boolean => {
   if (!plano || !plano.recursos) return false;
-  
   return plano.recursos[feature] === true;
 };
 
-/**
- * Criptografa senha usando bcrypt
- */
 export const hashPassword = async (password: string): Promise<string> => {
-  const saltRounds = 10;
-  return await bcrypt.hash(password, saltRounds);
+  return await bcrypt.hash(password, 10);
 };
 
-/**
- * Verifica senha criptografada
- */
 export const verifyPassword = async (password: string, hashedPassword: string): Promise<boolean> => {
   return await bcrypt.compare(password, hashedPassword);
 };
 
-/**
- * Verifica se a clínica tem plano Premium ou superior
- */
 export const hasPremiumAccess = (plano: any): boolean => {
   if (!plano) return false;
-  
-  const premiumPlans = ['Premium', 'Enterprise', 'Pro'];
-  return premiumPlans.includes(plano.nome);
+  return ['Premium', 'Enterprise', 'Pro'].includes(plano.nome);
 };
